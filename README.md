@@ -4,6 +4,8 @@
 Proyecto para la Feria de Proyectos de Ingeniería en Sistemas Computacionales — 7.º semestre.
 Equipo: 5 integrantes · Duración: 8 semanas · Presupuesto: bajo (≈ $1,650–$3,590 MXN).
 
+**▶ Prototipo en línea:** https://br-benja.github.io/holoclass/ · **Tarjetas:** https://br-benja.github.io/holoclass/prototipo/tarjetas.html
+
 ---
 
 ## Índice de documentos
