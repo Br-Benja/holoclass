@@ -4,7 +4,7 @@
 import { ARView } from './ar.js';
 import { QuizRunner } from './quiz.js';
 import { HoloHands } from './hands.js';
-import { $, $$, esc, fill, speak, stopSpeak, toast, sleep } from './util.js';
+import { $, $$, esc, fill, speak, stopSpeak, toast, sleep, icon } from './util.js';
 
 export class Viewer {
   constructor(app) {
@@ -23,31 +23,31 @@ export class Viewer {
       ar.on.confirmed = a => {
         this.log('marcador_detectado', { marker: a.id, model: a.content.contentKey });
         if (!this.active || !ar.isVisible(this.active)) this.setActive(a.content);
-        toast(`✔ ${this.catalog.markers[a.id].title}`);
-        if (ar.anchors.get(3)?.confirmed && ar.anchors.get(4)?.confirmed && !ar.st.realScale) toast('Tip: activa 🔭 Escala real para comparar la Tierra con Júpiter', 4000);
+        toast(this.catalog.markers[a.id].title, 2400, 'scan-line');
+        if (ar.anchors.get(3)?.confirmed && ar.anchors.get(4)?.confirmed && !ar.st.realScale) toast('Tip: activa «Escala real» para comparar la Tierra con Júpiter', 4000, 'telescope');
       };
       ar.on.lost = a => this.log('seguimiento_perdido', { marker: a.id });
       ar.on.reaction = (r, content) => {
         if (!r) { const first = [...ar.anchors.values()].find(a => a.group.visible); if (first) this.setActive(first.content); return; }
         this.setActive(content); this.log('reaccion', { payload: { result: r.result } });
-        toast(`⚗️ ¡Reacción! ${r.equation}`, 4000); if ($('#autoSpeak').checked) speak(`${r.equation}. ${r.text}`);
+        toast(`¡Reacción! ${r.equation}`, 4000, 'sparkles'); if ($('#autoSpeak').checked) speak(`${r.equation}. ${r.text}`);
       };
       ar.on.pick = res => {
         if (this.quiz?.awaitingPick) { if (res) this.quiz.onPick(res.key); return; }
         if (res) this.selectPart(res.content, res.key);
         else if (this.active?.highlighted) { this.active.setHighlight(null); this.renderInfo(); }
       };
-      ar.on.status = (t, kind) => toast(t);
+      ar.on.status = (t, kind) => toast(t, 3000, 'gauge');
       let lastUi = 0;
       ar.on.frame = now => {
         if (now - lastUi < 400) return; lastUi = now;
         $('#fps').textContent = `${ar.fps} FPS · detección ${ar.lastDetectMs.toFixed(0)} ms${ar.worker ? ' · worker' : ''}`;
         this.fpsLog = (this.fpsLog || []).concat(ar.fps).slice(-300);
-        if (ar.pinned) { $('#hint').textContent = ''; return; }
-        if (ar.source === 'none') { this.setStatus('Sin cámara', 'search'); return; }
+        if (ar.pinned) { $('#hint').innerHTML = ''; return; }
+        if (ar.source === 'none') { this.setStatus('Sin cámara', 'search', 'video'); return; }
         const tr = ar.tracked(now).length;
-        this.setStatus(tr ? `● Seguimiento estable (${tr})` : '◌ Buscando tarjeta…', tr ? 'ok' : 'search');
-        $('#hint').textContent = now - ar.lastSeenAny > 3000 ? (ar.brightness < 60 ? '💡 Hay poca luz: acércate a una lámpara' : '🪪 Muestra una tarjeta a 30–60 cm de la cámara') : '';
+        this.setStatus(tr ? `Seguimiento estable (${tr})` : 'Buscando tarjeta…', tr ? 'ok' : 'search', tr ? 'circle-check' : 'scan-line');
+        $('#hint').innerHTML = now - ar.lastSeenAny > 3000 ? (ar.brightness < 60 ? `${icon('lightbulb')} Hay poca luz: acércate a una lámpara` : `${icon('scan-line')} Muestra una tarjeta a 30–60 cm de la cámara`) : '';
       };
     }
     this.ar.catalog = this.catalog;
@@ -59,22 +59,24 @@ export class Viewer {
     await this.close();
     this.moduleKey = moduleKey; this.explored = new Set(); this.active = null; this.tab = 'info';
     const ar = this.ensureAR(); const mod = this.module;
-    ar.clearAnchors(); ar.exitPinned(); $('#tPin').textContent = '📌 Fijar en pantalla';
+    ar.clearAnchors(); ar.exitPinned(); this.setPinLabel(false);
     $('#cutWrap').hidden = true; this.hands?.stop(); $('#tHands').classList.remove('on');
-    Object.assign(ar.st, { animate: true, flow: false, explodeTarget: 0, cut: 0, realScale: false, quiz: false, element: 6 });
-    $('#vTitle').textContent = `${this.app.subjectOf(mod).icon} ${mod.title}`;
+    // en pantallas pequeñas las etiquetas tapan el modelo: empiezan apagadas
+    Object.assign(ar.st, { animate: true, flow: false, explodeTarget: 0, cut: 0, realScale: false, quiz: false, element: 6, labels: $('#stage').clientWidth >= 520 });
+    $('#vTitle').innerHTML = `${icon(this.app.subjectOf(mod).icon)} ${esc(mod.title)}`;
     const keys = this.moduleModels();
-    $('#tFlow').hidden = $('#tCut').hidden = !keys.includes('heart');
+    $('#tFlow').hidden = $('#tCut').hidden = $('#tPalette').hidden = !keys.includes('heart');
     $('#tScale').hidden = !keys.some(k => ['earth', 'jupiter', 'saturn', 'mars'].includes(k));
     this.syncToolbar();
     this.renderSimButtons(); this.showTab('info');
     this.sid = await this.store.startSession(moduleKey).catch(() => null);
     this.flushTimer = setInterval(() => this.flush(), 8000);
     if (mode === 'camera') {
-      try { await ar.startCamera($('#camSelect').value || undefined); this.fillCameras(); }
-      catch (e) { console.warn(e); toast('No se pudo abrir la cámara. Usa 🧪 Simulación o explora sin cámara.', 5000); this.pin(mod.main); }
+      try { await this.openCamera(); }
+      catch (e) { console.warn(e); toast('No se pudo abrir la cámara. Usa «Simulación» o explora sin cámara.', 5000, 'triangle-alert'); this.pin(mod.main); }
     } else if (mode === 'sim') ar.startSim([mod.markers[0]]);
-    else { ar.stopSources(); this.pin(mod.main); this.setStatus('Exploración sin cámara', 'ok'); }
+    else { ar.stopSources(); this.pin(mod.main); this.setStatus('Exploración sin cámara', 'ok', 'mouse-pointer-2'); }
+    this.syncCameraUI();
     this.renderInfo();
   }
   async close() {
@@ -132,16 +134,42 @@ export class Viewer {
   pin(key) {
     const c = this.ar.enterPinned(key || this.active?.contentKey || this.module.main);
     this.log('anclado', { model: c.contentKey }); this.setActive(c);
-    $('#tPin').textContent = '🎯 Volver a la tarjeta';
-    this.setStatus('Modelo fijado: arrastra para girar, rueda para zoom', 'ok');
+    this.setPinLabel(true);
+    this.setStatus('Modelo fijado: arrastra para girar, rueda para zoom', 'ok', 'pin');
     return c;
   }
   unpin() {
-    if (this.ar.source === 'none') { toast('Activa 📷 Cámara o 🧪 Simulación para volver a la tarjeta.'); return; }
+    if (this.ar.source === 'none') { toast('Activa «Cámara» o «Simulación» para volver a la tarjeta.', 3500, 'camera'); return; }
     this.stopTour(); this.hands?.stop(); $('#tHands').classList.remove('on');
     this.ar.exitPinned(); this.active = null; this.ar.active = null; this.ar.buildLabels(null);
     const vis = this.ar.visibleContents(); if (vis[0]) this.setActive(vis[0]); else this.renderInfo();
-    $('#tPin').textContent = '📌 Fijar en pantalla';
+    this.setPinLabel(false);
+  }
+  setPinLabel(pinned) { $('#tPin').innerHTML = pinned ? `${icon('crosshair')} <span>Volver a la tarjeta</span>` : `${icon('pin')} <span>Fijar en pantalla</span>`; }
+
+  // ---------------------------------------------------------------- Cámara frontal / trasera
+  async openCamera(opts = {}) {
+    const dev = $('#camSelect').value;
+    await this.ar.startCamera(dev && !opts.facing ? { deviceId: dev } : { facing: opts.facing || this.ar.facing });
+    await this.fillCameras(); this.syncCameraUI();
+    if (this.ar.pinned && !this.quiz) this.unpin();
+  }
+  async flipCamera() {
+    const next = (this.ar.facingActual || this.ar.facing) === 'environment' ? 'user' : 'environment';
+    $('#camSelect').value = '';
+    try {
+      await this.openCamera({ facing: next });
+      if (this.ar.facingActual !== next && (await this.ar.listCameras()).length < 2) toast('Este dispositivo solo tiene una cámara.', 3000, 'camera');
+      else toast(next === 'environment' ? 'Cámara trasera' : 'Cámara frontal', 1800, 'switch-camera');
+    } catch (e) { toast('No se pudo cambiar de cámara: ' + (e.message || e), 4000, 'triangle-alert'); }
+  }
+  syncCameraUI() {
+    const ar = this.ar; if (!ar) return;
+    const facing = ar.source === 'camera' ? (ar.facingActual || ar.facing) : ar.facing;
+    $('#tFlip span').textContent = facing === 'environment' ? 'Trasera' : 'Frontal';
+    $('#facingSelect').value = facing;
+    $('#mirrorChk').checked = ar.mirror;
+    $('#tFlipFloat').hidden = ar.source !== 'camera';
   }
 
   // ---------------------------------------------------------------- Barra de herramientas
@@ -156,15 +184,21 @@ export class Viewer {
     on('#tScale', () => { this.ar.st.realScale = !this.ar.st.realScale; toast(this.ar.st.realScale ? 'Escala real de tamaños (Júpiter ≈ 11 × Tierra)' : 'Escala didáctica'); this.syncToolbar(); });
     on('#tLabels', () => { this.ar.st.labels = !this.ar.st.labels; this.syncToolbar(); });
     on('#tCam', async () => {
-      try { await this.ar.startCamera($('#camSelect').value || undefined); this.fillCameras(); if (this.ar.pinned && !this.quiz) this.unpin(); }
-      catch (e) { toast('No se pudo abrir la cámara: ' + (e.message || e)); }
+      try { await this.openCamera(); }
+      catch (e) { toast('No se pudo abrir la cámara: ' + (e.message || e), 4000, 'triangle-alert'); }
     });
+    on('#tFlip', () => this.flipCamera());
+    on('#tFlipFloat', () => this.flipCamera());
+    on('#tPalette', () => { this.ar.st.palette = this.ar.st.palette === 'real' ? 'didactic' : 'real'; this.log('animacion', { payload: { anim: 'colores_' + this.ar.st.palette } }); this.syncToolbar(); });
+    $('#facingSelect').addEventListener('change', async e => { $('#camSelect').value = ''; try { await this.openCamera({ facing: e.target.value }); } catch (err) { toast(err.message, 4000, 'triangle-alert'); } });
+    $('#mirrorChk').addEventListener('change', e => { this.ar.mirrorOverride = e.target.checked; this.ar.setMirror(e.target.checked); });
+    $('#lightChk').addEventListener('change', e => { this.ar.lightAdapt = e.target.checked; });
     on('#tSim', () => $('#simButtons').classList.toggle('open'));
     on('#tSettings', () => { $('#settingsPop').hidden = !$('#settingsPop').hidden; this.fillCameras(); });
     on('#tFull', () => { const el = $('#stageCol'); document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen?.(); });
     on('#tHands', () => this.toggleHands());
     $('#speedRange').addEventListener('input', e => { this.ar.st.speed = +e.target.value; $('#speedVal').textContent = `${(+e.target.value).toFixed(2)}×`; });
-    $('#camSelect').addEventListener('change', async e => { if (this.ar?.source === 'camera') { try { await this.ar.startCamera(e.target.value); } catch (err) { toast(err.message); } } });
+    $('#camSelect').addEventListener('change', async () => { if (this.ar?.source === 'camera') { try { this.ar.mirrorOverride = null; await this.openCamera(); } catch (err) { toast(err.message, 4000, 'triangle-alert'); } } });
     $$('[data-vtab]').forEach(b => b.addEventListener('click', () => this.showTab(b.dataset.vtab)));
   }
   syncToolbar() {
@@ -172,35 +206,38 @@ export class Viewer {
     $('#tAnim').classList.toggle('on', st.animate); $('#tFlow').classList.toggle('on', st.flow);
     $('#tExplode').classList.toggle('on', !!st.explodeTarget); $('#tScale').classList.toggle('on', st.realScale);
     $('#tLabels').classList.toggle('on', st.labels); $('#tCut').classList.toggle('on', !$('#cutWrap').hidden);
+    $('#tAnim').innerHTML = `${icon(st.animate ? 'pause' : 'play')} Animación`;
+    $('#tPalette span').textContent = st.palette === 'real' ? 'Colores reales' : 'Colores didácticos';
   }
   async fillCameras() {
     const cams = await this.ar.listCameras(); const sel = $('#camSelect'), cur = sel.value;
-    sel.innerHTML = '<option value="">Predeterminada</option>' + cams.map((c, i) => `<option value="${c.deviceId}">${esc(c.label || 'Cámara ' + (i + 1))}</option>`).join('');
-    sel.value = cur;
+    sel.innerHTML = '<option value="">Automático (según frontal/trasera)</option>' + cams.map((c, i) => `<option value="${esc(c.deviceId)}">${esc(c.label || 'Cámara ' + (i + 1))}</option>`).join('');
+    sel.value = cams.some(c => c.deviceId === cur) ? cur : '';
+    $('#tFlip').hidden = false;
   }
   renderSimButtons() {
     const mod = this.module, opts = mod.markers.map(id => ({ ids: [id], label: `#${id} ${this.catalog.markers[id].title}` }));
     if (mod.markers.includes(3) && mod.markers.includes(4)) opts.push({ ids: [3, 4], label: 'Tierra + Júpiter (comparar)' });
     for (const r of this.catalog.reactions) {
       const ia = Object.keys(this.catalog.markers).find(k => this.catalog.markers[k].model === 'atom_' + r.a), ib = Object.keys(this.catalog.markers).find(k => this.catalog.markers[k].model === 'atom_' + r.b);
-      if (ia && ib && mod.markers.includes(+ia)) opts.push({ ids: [+ia, +ib], label: `⚗️ ${r.a} + ${r.b} (reacción)` });
+      if (ia && ib && mod.markers.includes(+ia)) opts.push({ ids: [+ia, +ib], label: `${r.a} + ${r.b} (reacción)`, ic: 'sparkles' });
     }
-    $('#simButtons').innerHTML = opts.map((o, i) => `<button class="chip" data-i="${i}">${esc(o.label)}</button>`).join('');
-    $$('#simButtons button').forEach(b => b.onclick = () => { this.ar.startSim(opts[b.dataset.i].ids); if (this.ar.pinned && !this.quiz) this.unpin(); this.setStatus('Simulación: tarjeta virtual', 'search'); });
+    $('#simButtons').innerHTML = opts.map((o, i) => `<button class="chip" data-i="${i}">${icon(o.ic || 'scan-line')} ${esc(o.label)}</button>`).join('');
+    $$('#simButtons button').forEach(b => b.onclick = () => { this.ar.startSim(opts[b.dataset.i].ids); this.syncCameraUI(); if (this.ar.pinned && !this.quiz) this.unpin(); this.setStatus('Simulación: tarjeta virtual', 'search', 'flask-conical'); });
   }
-  setStatus(t, kind) { const s = $('#vStatus'); s.textContent = t; s.className = 'pill ' + kind; }
+  setStatus(t, kind, ic) { const s = $('#vStatus'); s.innerHTML = (ic ? icon(ic) : '') + `<span>${esc(t)}</span>`; s.className = 'pill ' + kind; }
 
   // ---------------------------------------------------------------- HoloHands
   async toggleHands() {
     if (this.hands?.active) { this.hands.stop(); $('#tHands').classList.remove('on'); return; }
-    if (this.ar.source !== 'camera') { toast('Los gestos necesitan la cámara real (📷).'); return; }
+    if (this.ar.source !== 'camera') { toast('Los gestos necesitan la cámara real.', 3000, 'camera'); return; }
     if (!this.ar.pinned) this.pin();
     this.hands ||= new HoloHands({ ar: this.ar, video: $('#video'), cursor: $('#handCursor'),
       onSelect: hit => { this.log('gesto', { payload: { g: 'seleccion' } }); if (this.quiz?.awaitingPick) this.quiz.onPick(hit.key); else this.selectPart(hit.content, hit.key); },
       onNav: dir => { this.log('gesto', { payload: { g: 'deslizar' } }); this.stepPart(dir); },
-      onStatus: (t, off) => { toast(t, 3500); if (off) $('#tHands').classList.remove('on'); } });
+      onStatus: (t, off) => { toast(t, 3500, 'hand'); if (off) $('#tHands').classList.remove('on'); } });
     try { await this.hands.start(); $('#tHands').classList.add('on'); }
-    catch (e) { toast('No se pudieron activar los gestos: ' + (e.message || e), 5000); }
+    catch (e) { toast('No se pudieron activar los gestos: ' + (e.message || e), 5000, 'triangle-alert'); }
   }
   stepPart(dir) {
     const c = this.active; if (!c) return;
@@ -223,14 +260,14 @@ export class Viewer {
     const pct = this.exploredPct();
     const head = `<div class="explore-meter"><span>Exploración del módulo</span><b>${pct}%</b></div><div class="progress"><div style="width:${pct}%"></div></div>`;
     if (!c) {
-      el.innerHTML = head + `<div class="empty"><div class="big">${this.app.subjectOf(mod).icon}</div>
+      el.innerHTML = head + `<div class="empty"><div class="big">${icon(this.app.subjectOf(mod).icon, 'xl')}</div>
         <p>Muestra una tarjeta de <b>${esc(mod.title)}</b> frente a la cámara.</p>
         <p class="muted small">Tarjetas: ${mod.markers.map(id => `#${id} ${esc(this.catalog.markers[id]?.title)}`).join(' · ')}</p>
-        <p class="muted small">¿Sin tarjetas? <a href="tarjetas.html?module=${mod.key}" target="_blank">Ábrelas aquí</a>, usa 🧪 Simulación o 📌 Fijar.</p></div>`;
+        <p class="muted small">¿Sin tarjetas? <a href="tarjetas.html?module=${mod.key}" target="_blank">Ábrelas aquí</a>, usa «Simulación» o «Fijar en pantalla».</p></div>`;
       return;
     }
     const model = this.catalog.models[c.contentKey]; if (!model) { el.innerHTML = head; return; }
-    if (!c.ready) { el.innerHTML = head + `<p class="muted">${c.error ? '✖ No se pudo cargar el modelo 3D.' : '⏳ Cargando modelo 3D…'}</p>`; return; }
+    if (!c.ready) { el.innerHTML = head + `<p class="muted">${c.error ? icon('circle-x') + ' No se pudo cargar el modelo 3D.' : icon('refresh-cw', 'spin') + ' Cargando modelo 3D…'}</p>`; return; }
     const vars = this.vars(c);
     const keys = Object.keys(model.parts).filter(k => c.parts[k]);
     const sel = c.highlighted && model.parts[c.highlighted];
@@ -240,9 +277,9 @@ export class Viewer {
         ${c.element ? `<p class="el-info"><b>${esc(c.element.name)}</b> · Z = ${c.element.Z} · ${c.element.N} neutrones · configuración <b>${c.config()}</b></p>` : ''}`;
     }
     html += sel ? `<div class="part-card"><h3>${esc(sel.name)}</h3><p>${esc(fill(sel.text, vars))}</p>
-        ${sel.fact ? `<p class="fact">💡 ${esc(fill(sel.fact, vars))}</p>` : ''}
+        ${sel.fact ? `<p class="fact">${icon('lightbulb')} ${esc(fill(sel.fact, vars))}</p>` : ''}
         ${sel.more ? `<details class="more"><summary>Saber más</summary><p>${esc(fill(sel.more, vars))}</p></details>` : ''}
-        <div class="row"><button class="btn ghost small" id="iSpeak">🔊 Escuchar</button>${this.ar.pinned ? '<button class="btn ghost small" id="iFocus">🔍 Acercar</button>' : ''}<button class="btn ghost small" id="iClear">✖ Quitar selección</button></div></div>`
+        <div class="row"><button class="btn ghost small" id="iSpeak">${icon('volume-2')} Escuchar</button>${this.ar.pinned ? `<button class="btn ghost small" id="iFocus">${icon('zoom-in')} Acercar</button>` : ''}<button class="btn ghost small" id="iClear">${icon('x')} Quitar selección</button></div></div>`
       : `<p>${esc(fill(model.intro, vars))}</p><p class="muted small">Toca una parte del modelo o una etiqueta para ver su explicación.</p>`;
     html += `<div class="chips">${keys.map(k => `<button class="chip ${this.explored.has(c.contentKey + ':' + k) ? 'done' : ''} ${c.highlighted === k ? 'sel' : ''}" data-k="${k}">${esc(model.parts[k].name)}</button>`).join('')}</div>`;
     if (model.source === 'glb' && model.attribution) html += `<p class="muted small credit">Modelo: ${esc(model.attribution)} · ${esc(model.license || '')}</p>`;
@@ -259,10 +296,10 @@ export class Viewer {
     const el = $('#pTour'), t = this.tour;
     const key = this.active?.contentKey || this.module.main, model = this.catalog.models[key];
     const steps = (model.tour || Object.keys(model.parts)).filter(k => model.parts[k]);
-    el.innerHTML = `<h2>🧭 Recorrido guiado</h2><p class="muted">${esc(model.name)}: la cámara enfoca cada parte, la resalta y la explica en voz alta.</p>
+    el.innerHTML = `<h2>${icon('compass')} Recorrido guiado</h2><p class="muted">${esc(model.name)}: la cámara enfoca cada parte, la resalta y la explica en voz alta.</p>
       <ol class="tour-steps">${steps.map((k, i) => `<li class="${t && t.i === i ? 'cur' : ''} ${this.explored.has(key + ':' + k) ? 'done' : ''}">${esc(model.parts[k].name)}</li>`).join('')}</ol>
-      <div class="row">${t ? `<button class="btn ghost" id="trPrev">◀</button><button class="btn ghost" id="trPause">${t.paused ? '▶ Continuar' : '⏸ Pausa'}</button><button class="btn ghost" id="trNext">▶▶</button><button class="btn ghost" id="trStop">⏹ Detener</button>`
-        : `<button class="btn primary" id="trStart">▶ Iniciar recorrido</button>`}</div>
+      <div class="row">${t ? `<button class="btn ghost" id="trPrev" title="Anterior">${icon('skip-back')}</button><button class="btn ghost" id="trPause">${t.paused ? icon('play') + ' Continuar' : icon('pause') + ' Pausa'}</button><button class="btn ghost" id="trNext" title="Siguiente">${icon('skip-forward')}</button><button class="btn ghost" id="trStop">${icon('square')} Detener</button>`
+        : `<button class="btn primary" id="trStart">${icon('play')} Iniciar recorrido</button>`}</div>
       <label class="small"><input type="checkbox" id="trVoice" ${this.tourVoice !== false ? 'checked' : ''}> Narrar cada paso</label>`;
     $('#trVoice').onchange = e => { this.tourVoice = e.target.checked; };
     if (!t) { $('#trStart').onclick = () => this.startTour(key, steps); return; }
@@ -287,7 +324,7 @@ export class Viewer {
       if (t.stopped) break;
       t.i = Math.max(0, t.i + (t.jump || 1)); t.jump = 0;
     }
-    if (this.tour === t) { this.tour = null; this.ar.resetView(); c.setHighlight(null); if (!t.stopped) toast('✔ Recorrido terminado'); this.renderTour(); this.renderInfo(); }
+    if (this.tour === t) { this.tour = null; this.ar.resetView(); c.setHighlight(null); if (!t.stopped) toast('Recorrido terminado', 2500, 'circle-check'); this.renderTour(); this.renderInfo(); }
   }
   stopTour() { if (this.tour) { this.tour.stopped = true; stopSpeak(); this.tour = null; } }
 
@@ -297,14 +334,14 @@ export class Viewer {
     const prog = (await this.store.progress())[mod.key] || {};
     const pct = Math.max(this.exploredPct(), prog.explored || 0), need = mod.min_explored_pct ?? 50;
     const qz = this.catalog.quizzes[mod.key] || {};
-    el.innerHTML = `<h2>📝 Evaluación</h2>
+    el.innerHTML = `<h2>${icon('clipboard-check')} Evaluación</h2>
       <div class="eval-card"><h3>1 · Pre-test <small class="muted">(${(qz.pre || []).length} preguntas)</small></h3>
         <p class="muted small">Contéstalo ANTES de explorar: mide lo que ya sabes para calcular cuánto aprendiste.</p>
-        ${prog.pre != null ? `<p>✔ Hecho: <b>${prog.pre}%</b></p>` : `<button class="btn primary" id="eStartPre" ${(qz.pre || []).length ? '' : 'disabled'}>Comenzar pre-test</button>`}</div>
+        ${prog.pre != null ? `<p>${icon('circle-check')} Hecho: <b>${prog.pre}%</b></p>` : `<button class="btn primary" id="eStartPre" ${(qz.pre || []).length ? '' : 'disabled'}>Comenzar pre-test</button>`}</div>
       <div class="eval-card"><h3>2 · Evaluación final <small class="muted">(${(qz.post || []).length} preguntas)</small></h3>
         <p class="muted small">Incluye preguntas que se contestan tocando el modelo 3D.</p>
         <div class="progress"><div style="width:${Math.min(100, (pct / need) * 100)}%"></div></div>
-        <p class="small">${pct >= need ? '✔ Exploraste lo suficiente' : `Explora al menos el ${need}% del módulo (llevas ${pct}%)`}</p>
+        <p class="small">${pct >= need ? icon('circle-check') + ' Exploraste lo suficiente' : `Explora al menos el ${need}% del módulo (llevas ${pct}%)`}</p>
         ${prog.best != null ? `<p>Mejor resultado: <b>${prog.best}%</b> (${prog.attempts} intento${prog.attempts === 1 ? '' : 's'})</p>` : ''}
         <button class="btn ${pct >= need ? 'primary' : 'ghost'}" id="eStartPost" ${(qz.post || []).length ? '' : 'disabled'}>${pct >= need ? 'Comenzar evaluación' : 'Comenzar de todos modos'}</button></div>`;
     $('#eStartPre') && ($('#eStartPre').onclick = () => this.startQuiz('pre'));

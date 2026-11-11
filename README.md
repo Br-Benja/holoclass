@@ -57,7 +57,8 @@ Además, el docente puede **crear módulos nuevos subiendo un modelo GLB** (marc
 
 - **RA en el navegador:** ArUco (`ARUCO_MIP_36h12`) con **js-aruco2** en un Web Worker · pose POSIT + filtro One-Euro · **Three.js** (WebGL)
 - **Interacción:** ratón/táctil (OrbitControls + raycasting) · **MediaPipe Hand Landmarker** (gestos, beta) · Web Speech API (narración)
-- **Interfaz:** HTML + CSS + **JavaScript con módulos ES** (sin compilación, se publica tal cual)
+- **Interfaz:** HTML + CSS + **JavaScript con módulos ES** (sin compilación, se publica tal cual) · iconos **Lucide**
+- **Realismo:** materiales PBR, tone mapping ACES, reflejos de entorno, estimación de luz desde el video, sombra de contacto, texturas procedurales con ruido de Perlin · cámara **frontal o trasera**
 - **Backend:** **FastAPI** + SQLAlchemy 2 · **PostgreSQL** (o SQLite para pruebas) · JWT + bcrypt · pytest
 - **Herramientas Python:** **OpenCV** (`cv2.aruco`) para generar tarjetas, calibrar la cámara y medir la detección
 - **Contenido 3D:** procedural (generado por código) + GLB del docente (GLTFLoader con meshopt)

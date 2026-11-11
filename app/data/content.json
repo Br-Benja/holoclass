@@ -1,9 +1,9 @@
 {
   "version": 2,
   "subjects": [
-    { "key": "anatomia", "name": "Anatomía", "color": "#EF4444", "icon": "🫀" },
-    { "key": "astronomia", "name": "Astronomía", "color": "#6366F1", "icon": "🪐" },
-    { "key": "quimica", "name": "Química", "color": "#10B981", "icon": "⚛️" }
+    { "key": "anatomia", "name": "Anatomía", "color": "#EF4444", "icon": "heart-pulse" },
+    { "key": "astronomia", "name": "Astronomía", "color": "#6366F1", "icon": "orbit" },
+    { "key": "quimica", "name": "Química", "color": "#10B981", "icon": "atom" }
   ],
   "modules": [
     { "key": "corazon", "subject": "anatomia", "title": "El corazón humano", "level": "Secundaria",
@@ -62,7 +62,7 @@
     "heart": {
       "name": "Corazón humano", "source": "procedural",
       "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
-      "intro": "El corazón es un músculo del tamaño aproximado de un puño que late unas 100,000 veces al día. En este modelo el lado derecho está en azul (sangre con poco oxígeno) y el izquierdo en rojo (sangre oxigenada). Recuerda: el lado izquierdo del corazón aparece a TU derecha cuando lo ves de frente.",
+      "intro": "El corazón es un músculo del tamaño aproximado de un puño que late unas 100,000 veces al día. Se muestra con colores anatómicos reales; con el botón «Colores» cambias a colores didácticos: el lado derecho en azul (sangre con poco oxígeno) y el izquierdo en rojo (sangre oxigenada). Recuerda: el lado izquierdo del corazón aparece a TU derecha cuando lo ves de frente.",
       "animations": ["latido", "flujo", "corte"],
       "tour": ["vena_cava", "auricula_der", "valvulas", "ventriculo_der", "arteria_pulm", "venas_pulm", "auricula_izq", "ventriculo_izq", "aorta", "coronarias"],
       "parts": {
@@ -251,6 +251,7 @@
     { "what": "js-aruco2 2.0.0 (detección ArUco y POSIT)", "license": "MIT", "url": "https://github.com/damianofalcioni/js-aruco2" },
     { "what": "MediaPipe Tasks Vision 0.10.21 (HoloHands)", "license": "Apache 2.0", "url": "https://github.com/google-ai-edge/mediapipe" },
     { "what": "Fuentes Inter y Space Grotesk", "license": "SIL Open Font License", "url": "https://fonts.google.com" },
+    { "what": "Iconos Lucide 0.460.0", "license": "ISC", "url": "https://lucide.dev" },
     { "what": "Modelos 3D (corazón, sistema solar, moléculas, átomo)", "license": "Propios, generados por código por el equipo", "url": "" }
   ]
 }

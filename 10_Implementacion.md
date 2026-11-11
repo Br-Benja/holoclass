@@ -35,6 +35,18 @@ Este documento describe **lo que está construido y funcionando**, cómo ejecuta
 | **HoloTeacher** | Grupos con código · alta por código · quitar estudiantes · resumen con KPIs · por módulo: pre, post, ganancia, **concepto más difícil**, % de aciertos por pregunta, partes más consultadas · tabla de estudiantes · **exportar CSV** · **editor de textos** · **editor de preguntas** (los 4 tipos) · **nuevo módulo desde un GLB** con marcador libre · datos simulados marcados como tales | ✅ |
 | **Plataforma** | Registro / inicio de sesión con roles · JWT + bcrypt (servidor) · PBKDF2 (modo local) · modo invitado (solo local) · insignias · página de créditos y licencias · privacidad: el video nunca sale del dispositivo | ✅ |
 
+### Realismo visual y cámaras
+
+| Aspecto | Implementación |
+|---------|----------------|
+| Iluminación | Tone mapping ACES (cinematográfico), mapa de entorno `RoomEnvironment` para reflejos PBR, luz principal + luz de contorno |
+| Integración con la escena | **Estimación de luz**: el brillo y el tono promedio del video ajustan la intensidad y el color de la luz del modelo · **sombra de contacto** sobre la tarjeta |
+| Corazón | Material físico de tejido húmedo (clearcoat + sheen), textura de fibras musculares, variación de color, orejuelas auriculares, grasa en los surcos coronarios; **colores reales** o **didácticos** (azul/rojo) con un botón |
+| Planetas | Texturas generadas con ruido de Perlin fractal: continentes, océanos, hielo polar, nubes y atmósfera en la Tierra; bandas y Gran Mancha Roja en Júpiter; casquetes en Marte; anillos con división de Cassini; Sol con granulación y resplandor. Se precalculan en segundo plano para que el módulo abra al instante |
+| Moléculas y átomos | Materiales brillantes tipo modelo de esferas y barras |
+| Cámaras | **Frontal o trasera** (botón o ajustes) y elección del dispositivo exacto. La frontal se muestra en espejo y la trasera no; la pose 3D se corrige en cada caso. En celulares la trasera es la predeterminada |
+| Iconos | Iconos vectoriales **Lucide** (ISC) incluidos localmente en lugar de emojis |
+
 **Futuras mejoras (no implementadas):** tarjetas con imagen propia (image tracking), reconocimiento de dibujos a mano, RA móvil con WebXR, modo competencia en clase, integración con Classroom/Moodle, editor 3D.
 
 ## 3. Arquitectura tal como quedó

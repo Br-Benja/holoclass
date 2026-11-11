@@ -4,6 +4,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildContent } from './models.js';
 
 export const MARKER_MM = 50;        // lado del marcador impreso (mm)
@@ -38,16 +39,35 @@ class PoseFilter {
   }
 }
 
-// Pose POSIT (x der, y arriba, z hacia la escena) -> Three.js (z hacia el observador),
-// con espejo horizontal F para coincidir con el video espejado:  M = F·S·R·S·F
+// Pose POSIT (x der, y arriba, z hacia la escena) -> Three.js (z hacia el observador): M = S·R·S
+// Con cámara frontal el video se muestra en espejo, así que también se refleja la pose: M = F·S·R·S·F
 const _m = new THREE.Matrix4(), _s = new THREE.Vector3();
-function poseToThree(r, t, pos, quat) {
-  _m.set(
+function poseToThree(r, t, pos, quat, mirror) {
+  if (mirror) _m.set(
      r[0][0], -r[0][1],  r[0][2], -t[0],
     -r[1][0],  r[1][1], -r[1][2],  t[1],
      r[2][0], -r[2][1],  r[2][2], -t[2],
      0, 0, 0, 1);
+  else _m.set(
+     r[0][0],  r[0][1], -r[0][2],  t[0],
+     r[1][0],  r[1][1], -r[1][2],  t[1],
+    -r[2][0], -r[2][1],  r[2][2], -t[2],
+     0, 0, 0, 1);
   _m.decompose(pos, quat, _s);
+}
+const isMobile = () => matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 900;
+const guessFacing = label => (/back|rear|trasera|environment|posterior|world/i.test(label || '') ? 'environment'
+  : /front|frontal|user|selfie|facetime|integrated|webcam/i.test(label || '') ? 'user' : null);
+
+// Sombra de contacto (degradado radial) que se proyecta sobre la tarjeta
+let _shadowTex = null;
+function shadowTexture() {
+  if (_shadowTex) return _shadowTex;
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+  const g = cv.getContext('2d'), grd = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+  grd.addColorStop(0, 'rgba(0,0,0,0.75)'); grd.addColorStop(0.45, 'rgba(0,0,0,0.38)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+  return (_shadowTex = new THREE.CanvasTexture(cv));
 }
 const easeOutBack = x => { const c1 = 1.4, c3 = c1 + 1; return x >= 1 ? 1 : 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
 
@@ -55,7 +75,9 @@ export class ARView {
   constructor({ stage, glHost, labels, video, sim, catalog, store }) {
     Object.assign(this, { stage, glHost, labelsEl: labels, video, simCanvas: sim, catalog, store });
     this.on = {};                      // callbacks: confirmed, lost, reaction, pick, status, frame
-    this.st = { animate: true, flow: false, explode: 0, cut: 0, speed: 1, realScale: false, element: 6, quiz: false, pinned: false, labels: true };
+    this.st = { animate: true, flow: false, explode: 0, cut: 0, speed: 1, realScale: false, element: 6, quiz: false, pinned: false, labels: true, palette: 'real' };
+    this.facing = localStorage.getItem('hc_facing') || (isMobile() ? 'environment' : 'user');
+    this.mirror = true; this.mirrorOverride = null; this.lightAdapt = true; this.ambient = { f: 1, color: new THREE.Color(1, 1, 1) };
     this.source = 'none'; this.simIds = []; this.pinned = false; this.active = null;
     this.anchors = new Map(); this.reaction = null;
     this.focal = DETECT_W; this.detectH = 480; this.busy = false; this.lastDetectMs = 0; this.brightness = 128; this.lastSeenAny = performance.now();
@@ -66,10 +88,15 @@ export class ARView {
 
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(devicePixelRatio, 1.5)); r.outputColorSpace = THREE.SRGBColorSpace; r.localClippingEnabled = true;
+    r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05;
     glHost.appendChild(r.domElement);
     this.scene = new THREE.Scene();
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x334466, 1.1));
-    const dl = new THREE.DirectionalLight(0xffffff, 1.7); dl.position.set(0.5, 1, 1.2); this.scene.add(dl);
+    // Iluminación basada en imagen: reflejos y luz ambiental realistas en los materiales PBR
+    const pmrem = new THREE.PMREMGenerator(r);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(r), 0.04).texture;
+    this.hemi = new THREE.HemisphereLight(0xffffff, 0x3a3f55, 0.55); this.scene.add(this.hemi);
+    this.key = new THREE.DirectionalLight(0xfff4e8, 1.6); this.key.position.set(0.6, 1, 1.1); this.scene.add(this.key);
+    this.rim = new THREE.DirectionalLight(0x9fc3ff, 0.6); this.rim.position.set(-1, 0.4, -0.8); this.scene.add(this.rim);
     this.arCamera = new THREE.PerspectiveCamera(41, 4 / 3, 1, 8000);
     this.arRoot = new THREE.Group(); this.scene.add(this.arRoot);
     this.pinCamera = new THREE.PerspectiveCamera(42, 4 / 3, 1, 8000); this.pinCamera.position.set(0, 25, 230);
@@ -149,13 +176,13 @@ export class ARView {
   }
   onWorker(msg) {
     if (msg.type !== 'result') return;
-    this.busy = false; this.lastDetectMs = msg.ms; this.brightness = msg.brightness;
+    this.busy = false; this.lastDetectMs = msg.ms; this.brightness = msg.brightness; if (msg.rgb) this.frameRGB = msg.rgb;
     if (this.pinned || this.source === 'none') return;
     const now = performance.now(), t = now / 1000, seen = new Set();
     for (const mk of msg.markers) {
       if (!this.catalog.markers[mk.id]) continue;
       const a = this.getAnchor(mk.id);
-      poseToThree(mk.rotation, mk.translation, a.targetPos, a.targetQuat);
+      poseToThree(mk.rotation, mk.translation, a.targetPos, a.targetQuat, this.mirror);
       a.filter.apply(a.targetPos, a.targetQuat, t);
       a.lastSeen = now; a.streak++; seen.add(mk.id);
       if (a.lostReported) a.lostReported = false;
@@ -172,7 +199,9 @@ export class ARView {
     const holder = new THREE.Group(); holder.position.z = 38; group.add(holder);
     const content = buildContent(this.catalog.markers[id].model, this.catalog, this.store);
     holder.add(content.group); this.arRoot.add(group);
-    const a = { id, group, holder, content, lastSeen: -1e9, streak: 0, confirmed: false, appear: 0, initialized: false, lostReported: false,
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false, opacity: 0.55 }));
+    shadow.position.set(-5, -7, 0.5); shadow.scale.setScalar(95); shadow.renderOrder = -1; group.add(shadow);
+    const a = { id, group, holder, content, shadow, lastSeen: -1e9, streak: 0, confirmed: false, appear: 0, initialized: false, lostReported: false,
       targetPos: new THREE.Vector3(), targetQuat: new THREE.Quaternion(), filter: new PoseFilter() };
     this.anchors.set(id, a);
     return a;
@@ -195,7 +224,8 @@ export class ARView {
       a.group.position.lerp(a.targetPos, k); a.group.quaternion.slerp(a.targetQuat, k);
       a.group.visible = a.appear > 0.02;
       const inReaction = this.reaction?.active && (this.reaction.a === a || this.reaction.b === a);
-      a.holder.scale.setScalar(Math.max(0.001, easeOutBack(a.appear) * (inReaction ? 0.35 : 1)));
+      const s = easeOutBack(a.appear) * (inReaction ? 0.35 : 1);
+      a.holder.scale.setScalar(Math.max(0.001, s)); a.shadow.scale.setScalar(Math.max(0.001, 95 * s)); a.shadow.material.opacity = 0.55 * Math.min(1, a.appear);
     }
     this.updateReactions(dt);
   }
@@ -240,18 +270,32 @@ export class ARView {
   async listCameras() {
     try { return (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput'); } catch { return []; }
   }
-  async startCamera(deviceId) {
+  /** Abre la cámara. `facing`: 'user' (frontal) o 'environment' (trasera); `deviceId` elige una cámara concreta. */
+  async startCamera({ deviceId, facing } = {}) {
     this.stopCamera();
-    const constraints = { video: deviceId ? { deviceId: { exact: deviceId }, width: { ideal: 640 }, height: { ideal: 480 } } : { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }, audio: false };
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (facing) { this.facing = facing; localStorage.setItem('hc_facing', facing); }
+    const size = { width: { ideal: 1280 }, height: { ideal: 720 } };
+    const video = deviceId ? { deviceId: { exact: deviceId }, ...size } : { facingMode: { ideal: this.facing }, ...size };
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video, audio: false }); }
+    catch (e) { if (deviceId || e.name === 'NotAllowedError') throw e; stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); }
     this.video.srcObject = stream; await this.video.play();
+    const track = stream.getVideoTracks()[0], set = track.getSettings?.() || {};
+    this.deviceId = set.deviceId || deviceId || null;
+    // ¿qué cámara se abrió en realidad? (en laptops suele haber solo la frontal)
+    this.facingActual = set.facingMode || guessFacing(track.label) || (deviceId ? 'user' : this.facing);
+    this.setMirror(this.mirrorOverride ?? this.facingActual !== 'environment');
     this.source = 'camera'; this.video.hidden = false; this.simCanvas.hidden = true;
     this.configureSize(this.video.videoWidth || 640, this.video.videoHeight || 480);
     return stream;
   }
+  setMirror(m) {
+    this.mirror = m; this.video.classList.toggle('mirror', m);
+    for (const a of this.anchors.values()) { a.filter.reset(); a.initialized = false; }
+  }
   stopCamera() { const s = this.video.srcObject; if (s) s.getTracks().forEach(t => t.stop()); this.video.srcObject = null; if (this.source === 'camera') this.source = 'none'; }
   startSim(ids) {
-    this.stopCamera(); this.source = 'sim'; this.simIds = ids;
+    this.stopCamera(); this.source = 'sim'; this.simIds = ids; this.setMirror(true);
     this.simCanvas.width = 640; this.simCanvas.height = 480;
     this.video.hidden = true; this.simCanvas.hidden = false;
     this.configureSize(640, 480);
@@ -366,6 +410,7 @@ export class ARView {
     if (this.worker && this.busy && now - this.sentAt > 4000) { console.warn('El worker no responde; se usa el hilo principal'); this.worker.terminate(); this.worker = null; this.busy = false; this.initMainThreadDetector(); }
     this.updateAnchors(now, dt);
     this.st.explode += ((this.st.explodeTarget || 0) - this.st.explode) * Math.min(1, dt * 5);
+    this.updateLighting(dt);
     for (const c of this.visibleContents()) { if (!c.ready) continue; c.update(t, dt, this.st); c.applyExplode(this.st.explode); }
     if (this.camTween) {
       const k = Math.min(1, (now - this.camTween.t0) / this.camTween.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
@@ -383,6 +428,21 @@ export class ARView {
       if (now - this.lowFpsSince > 3000 && this.renderer.getPixelRatio() > 1) { this.renderer.setPixelRatio(1); this.resize(); this.on.status?.('Calidad gráfica reducida para mantener la fluidez', 'warn'); }
     } else this.lowFpsSince = null;
     this.on.frame?.(now, dt);
+  }
+  /** Estimación de luz: el brillo y el tono del video ajustan la iluminación para que el modelo se integre a la escena. */
+  updateLighting(dt) {
+    const live = this.lightAdapt && !this.pinned && this.source === 'camera';
+    const f = live ? Math.max(0.55, Math.min(1.35, (this.brightness || 120) / 120)) : 1;
+    this.ambient.f += (f - this.ambient.f) * Math.min(1, dt * 2);
+    const target = new THREE.Color(1, 1, 1);
+    if (live && this.frameRGB) {
+      const [r, g, b] = this.frameRGB, m = Math.max(r, g, b, 1);
+      target.setRGB(0.65 + 0.35 * r / m, 0.65 + 0.35 * g / m, 0.65 + 0.35 * b / m);
+    }
+    this.ambient.color.lerp(target, Math.min(1, dt * 2));
+    this.hemi.intensity = 0.55 * this.ambient.f; this.hemi.color.copy(this.ambient.color);
+    this.key.intensity = 1.6 * this.ambient.f; this.key.color.copy(this.ambient.color).lerp(new THREE.Color(0xfff4e8), 0.5);
+    this.renderer.toneMappingExposure = 1.05 * (0.85 + 0.15 * this.ambient.f);
   }
   tracked(now = performance.now()) { return [...this.anchors.values()].filter(a => a.confirmed && now - a.lastSeen < KEEP_MS); }
 }

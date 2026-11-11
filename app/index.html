@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
   <title>HoloClass</title>
   <meta name="description" content="Aula interactiva de aprendizaje con realidad aumentada y visión artificial">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔷</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpath d='m3.3 7 8.7 5 8.7-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
@@ -22,17 +23,17 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="logo" href="#/home"><span class="cube">◆</span> HoloClass</a>
+    <a class="logo" href="#/home"><i data-icon="box" class="cube"></i> HoloClass</a>
     <nav class="nav">
-      <a href="#/home" data-nav="home">Inicio</a>
-      <a href="tarjetas.html" target="_blank">🖨 Tarjetas</a>
-      <a href="#/teacher" data-nav="teacher" id="navTeacher" hidden>👩‍🏫 Panel docente</a>
-      <a href="#/about" data-nav="about">ⓘ Acerca</a>
+      <a href="#/home" data-nav="home"><i data-icon="layers"></i> Inicio</a>
+      <a href="tarjetas.html" target="_blank"><i data-icon="printer"></i> Tarjetas</a>
+      <a href="#/teacher" data-nav="teacher" id="navTeacher" hidden><i data-icon="graduation-cap"></i> Panel docente</a>
+      <a href="#/about" data-nav="about"><i data-icon="info"></i> Acerca</a>
     </nav>
     <div class="userbox">
       <span id="modeBadge" class="pill"></span>
       <span id="userChip" class="user-chip" hidden></span>
-      <button id="btnLogout" class="btn ghost small" hidden>Salir</button>
+      <button id="btnLogout" class="btn ghost small" hidden><i data-icon="log-out"></i> Salir</button>
     </div>
   </header>
 
@@ -42,8 +43,11 @@
   <main data-page="login" class="login" hidden>
     <section class="login-hero">
       <h1>Convierte una tarjeta de papel en una <span class="glow">lección 3D</span></h1>
-      <p>Muestra una tarjeta a la webcam: el modelo aparece sobre ella, lo exploras por partes con explicación en voz, y respondes preguntas <b>tocando el modelo</b>. Tu docente ve qué conceptos dominas.</p>
-      <ul class="feats"><li>🫀 Anatomía</li><li>🪐 Astronomía</li><li>⚛️ Química</li><li>✋ Gestos</li><li>📊 Panel docente</li></ul>
+      <p>Muestra una tarjeta a la cámara: el modelo aparece sobre ella, lo exploras por partes con explicación en voz, y respondes preguntas <b>tocando el modelo</b>. Tu docente ve qué conceptos dominas.</p>
+      <ul class="feats">
+        <li><i data-icon="heart-pulse"></i> Anatomía</li><li><i data-icon="orbit"></i> Astronomía</li><li><i data-icon="atom"></i> Química</li>
+        <li><i data-icon="hand"></i> Gestos</li><li><i data-icon="chart-column"></i> Panel docente</li>
+      </ul>
     </section>
     <section class="login-card">
       <div class="tabs"><button class="tab active" data-ltab="in">Entrar</button><button class="tab" data-ltab="up">Crear cuenta</button></div>
@@ -62,7 +66,7 @@
       </form>
       <p id="loginErr" class="err"></p>
       <div class="demo-box"><p class="muted small">Para probar rápido:</p>
-        <div class="row"><button class="btn ghost" id="demoStudent">🎒 Estudiante demo</button><button class="btn ghost" id="demoTeacher">👩‍🏫 Docente demo</button><button class="btn ghost" id="guestBtn">Explorar sin cuenta</button></div>
+        <div class="row"><button class="btn ghost" id="demoStudent"><i data-icon="backpack"></i> Estudiante demo</button><button class="btn ghost" id="demoTeacher"><i data-icon="graduation-cap"></i> Docente demo</button><button class="btn ghost" id="guestBtn"><i data-icon="user"></i> Sin cuenta</button></div>
         <p class="muted small">Demo: <code>estudiante@demo.mx</code> / <code>docente@demo.mx</code> · contraseña <code>demo1234</code> · grupo <code>DEMO01</code></p></div>
     </section>
   </main>
@@ -72,11 +76,11 @@
     <section class="hello">
       <div><h1 id="hello"></h1><p id="helloSub" class="muted"></p></div>
       <div id="joinBox" class="join-box">
-        <form id="formJoin" class="row"><input id="joinCode" maxlength="6" placeholder="Código de grupo" style="text-transform:uppercase"><button class="btn ghost">Unirme</button></form>
+        <form id="formJoin" class="row"><input id="joinCode" maxlength="6" placeholder="Código" style="text-transform:uppercase"><button class="btn ghost"><i data-icon="users"></i> Unirme</button></form>
         <p id="myGroups" class="muted small"></p>
       </div>
     </section>
-    <div id="guestNote" class="warnbox" hidden>Estás como <b>invitado</b>: tu progreso solo se guarda en este navegador y tu docente no lo verá. <a href="#/login">Crea una cuenta</a>.</div>
+    <div id="guestNote" class="warnbox" hidden><i data-icon="triangle-alert"></i> Estás <b>sin cuenta</b>: tu progreso solo se guarda en este navegador y tu docente no lo verá. <a href="#/login">Crea una cuenta</a>.</div>
     <div id="badges" class="badges"></div>
     <h2>Módulos</h2>
     <div id="modules" class="modules"></div>
@@ -85,7 +89,7 @@
   <!-- ================= VISOR RA ================= -->
   <main data-page="viewer" class="viewer" hidden>
     <div class="viewer-head">
-      <a class="btn ghost small" href="#/home">← Módulos</a>
+      <a class="btn ghost small" href="#/home"><i data-icon="chevron-left"></i> Módulos</a>
       <h2 id="vTitle"></h2>
       <span id="vStatus" class="pill search">—</span>
     </div>
@@ -99,34 +103,41 @@
           <div id="handCursor" class="hand-cursor" hidden></div>
           <div id="hint" class="hint"></div>
           <div id="fps" class="fps"></div>
+          <button id="tFlipFloat" class="flip-float" title="Cambiar entre cámara frontal y trasera" hidden><i data-icon="switch-camera"></i></button>
         </div>
         <div class="toolbar">
-          <button id="tPin" class="tool">📌 Fijar en pantalla</button>
-          <button id="tAnim" class="tool">⏯ Animación</button>
-          <button id="tFlow" class="tool">🩸 Flujo</button>
-          <button id="tCut" class="tool">✂ Corte</button>
+          <button id="tPin" class="tool"><i data-icon="pin"></i> <span>Fijar en pantalla</span></button>
+          <button id="tAnim" class="tool"><i data-icon="play"></i> Animación</button>
+          <button id="tPalette" class="tool" title="Colores reales o didácticos"><i data-icon="palette"></i> <span>Colores reales</span></button>
+          <button id="tFlow" class="tool"><i data-icon="droplet"></i> Flujo</button>
+          <button id="tCut" class="tool"><i data-icon="scissors"></i> Corte</button>
           <span id="cutWrap" class="slider" hidden>Corte <input type="range" id="cutRange" min="0" max="1" step="0.01" value="0"></span>
-          <button id="tExplode" class="tool">💥 Explosionar</button>
-          <button id="tScale" class="tool">🔭 Escala real</button>
-          <button id="tLabels" class="tool">🏷 Etiquetas</button>
-          <button id="tHands" class="tool">✋ Gestos <small>beta</small></button>
-          <button id="tCam" class="tool">📷 Cámara</button>
-          <button id="tSim" class="tool">🧪 Simulación</button>
-          <button id="tFull" class="tool" title="Pantalla completa">⛶</button>
-          <button id="tSettings" class="tool" title="Ajustes">⚙</button>
+          <button id="tExplode" class="tool"><i data-icon="expand"></i> Explosionar</button>
+          <button id="tScale" class="tool"><i data-icon="telescope"></i> Escala real</button>
+          <button id="tLabels" class="tool"><i data-icon="tag"></i> Etiquetas</button>
+          <button id="tHands" class="tool"><i data-icon="hand"></i> Gestos <small>beta</small></button>
+          <button id="tCam" class="tool"><i data-icon="camera"></i> Cámara</button>
+          <button id="tFlip" class="tool" title="Cambiar entre cámara frontal y trasera"><i data-icon="switch-camera"></i> <span>Frontal</span></button>
+          <button id="tSim" class="tool"><i data-icon="flask-conical"></i> Simulación</button>
+          <button id="tFull" class="tool icon-only" title="Pantalla completa"><i data-icon="maximize"></i></button>
+          <button id="tSettings" class="tool icon-only" title="Ajustes"><i data-icon="settings"></i></button>
         </div>
         <div id="simButtons" class="sim-buttons"></div>
         <div id="settingsPop" class="settings" hidden>
-          <label>Cámara <select id="camSelect"><option value="">Predeterminada</option></select></label>
+          <label>Cámara
+            <select id="facingSelect"><option value="user">Frontal (selfie)</option><option value="environment">Trasera</option></select></label>
+          <label>Dispositivo <select id="camSelect"><option value="">Automático</option></select></label>
+          <label title="Actívalo si al mover la tarjeta a la derecha el video se mueve a la izquierda"><input type="checkbox" id="mirrorChk" checked> Vista en espejo</label>
           <label>Velocidad de animación <input type="range" id="speedRange" min="0.25" max="3" step="0.25" value="1"> <b id="speedVal">1.00×</b></label>
-          <label><input type="checkbox" id="autoSpeak"> 🔊 Narrar al tocar una parte</label>
+          <label><input type="checkbox" id="autoSpeak"> Narrar al tocar una parte</label>
+          <label><input type="checkbox" id="lightChk" checked> Ajustar la luz a la del cuarto</label>
         </div>
       </div>
       <aside class="panel">
         <div class="tabs">
-          <button class="tab active" data-vtab="info">Explorar</button>
-          <button class="tab" data-vtab="tour">Recorrido</button>
-          <button class="tab" data-vtab="eval">Evaluación</button>
+          <button class="tab active" data-vtab="info"><i data-icon="book-open"></i> Explorar</button>
+          <button class="tab" data-vtab="tour"><i data-icon="compass"></i> Recorrido</button>
+          <button class="tab" data-vtab="eval"><i data-icon="clipboard-check"></i> Evaluación</button>
         </div>
         <div id="pInfo" class="panel-body"></div>
         <div id="pTour" class="panel-body" hidden></div>
@@ -137,20 +148,20 @@
 
   <!-- ================= PANEL DOCENTE ================= -->
   <main data-page="teacher" class="page" hidden>
-    <h1>👩‍🏫 Panel docente</h1>
+    <h1><i data-icon="graduation-cap"></i> Panel docente</h1>
     <div class="tabs ttabs">
-      <button class="tab active" data-ttab="summary">📊 Resumen</button>
-      <button class="tab" data-ttab="groups">👥 Grupos</button>
-      <button class="tab" data-ttab="content">✏️ Contenidos</button>
-      <button class="tab" data-ttab="quizzes">📝 Preguntas</button>
-      <button class="tab" data-ttab="newmodule">➕ Nuevo módulo</button>
+      <button class="tab active" data-ttab="summary"><i data-icon="chart-column"></i> Resumen</button>
+      <button class="tab" data-ttab="groups"><i data-icon="users"></i> Grupos</button>
+      <button class="tab" data-ttab="content"><i data-icon="pencil"></i> Contenidos</button>
+      <button class="tab" data-ttab="quizzes"><i data-icon="list-checks"></i> Preguntas</button>
+      <button class="tab" data-ttab="newmodule"><i data-icon="circle-plus"></i> Nuevo módulo</button>
     </div>
     <div id="teacherBody"></div>
   </main>
 
   <!-- ================= ACERCA / AJUSTES ================= -->
   <main data-page="about" class="page" hidden>
-    <h1>ⓘ Acerca de HoloClass</h1>
+    <h1><i data-icon="info"></i> Acerca de HoloClass</h1>
     <div id="aboutBody"></div>
   </main>
 

@@ -29,7 +29,7 @@ export class HoloHands {
       catch { opts.baseOptions.delegate = 'CPU'; this.landmarker = await HandLandmarker.createFromOptions(fileset, opts); }
     }
     this.active = true; this.cursor.hidden = false;
-    this.onStatus?.('✋ Gestos activos: pellizca para girar, señala 1 s para seleccionar');
+    this.onStatus?.('Gestos activos: pellizca para girar, señala 1 s para seleccionar');
     const tick = () => { if (!this.active) return; this.step(); requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
   }
@@ -42,8 +42,8 @@ export class HoloHands {
     const pinch = d2(lm[4], lm[8]) / scale < 0.33;
     const point = index && !middle && !ring && !pinky && !pinch;
     const open = index && middle && ring && pinky && !pinch;
-    // coordenadas de pantalla (el video se muestra espejado)
-    const P = (p) => ({ x: 1 - p.x, y: p.y });
+    // coordenadas de pantalla (con la cámara frontal el video se muestra en espejo)
+    const P = (p) => ({ x: this.ar.mirror ? 1 - p.x : p.x, y: p.y });
     return { pinch, point, open, pinchPt: P({ x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2 }), tip: P(lm[8]), palm: P(lm[9]) };
   }
 

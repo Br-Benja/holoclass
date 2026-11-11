@@ -3,7 +3,7 @@
 //  Tipos: opción múltiple (mc), verdadero/falso (tf), selección en el modelo 3D (pick), ordenar (order)
 //  Pre-test: sin retroalimentación (mide conocimientos previos). Evaluación: retroalimentación inmediata.
 // =====================================================================
-import { esc, shuffle, confetti, speak } from './util.js';
+import { esc, shuffle, confetti, speak, icon } from './util.js';
 
 export class QuizRunner {
   constructor({ el, store, catalog, moduleKey, kind, getModelContent, onPickModeChange, onDone }) {
@@ -25,7 +25,7 @@ export class QuizRunner {
     const q = this.q, fb = this.feedback, pre = this.kind === 'pre';
     this.awaitingPick = q.type === 'pick' && !fb;
     this.onPickModeChange?.(this.awaitingPick);
-    const tag = { mc: 'Opción múltiple', tf: 'Verdadero o falso', pick: '🎯 En el modelo 3D', order: '↕ Ordenar' }[q.type];
+    const tag = { mc: icon('list-checks') + ' Opción múltiple', tf: icon('check') + ' Verdadero o falso', pick: icon('crosshair') + ' En el modelo 3D', order: icon('arrow-up-down') + ' Ordenar' }[q.type];
     let html = `<div class="q-head"><span>${pre ? 'Pre-test' : 'Evaluación'} · ${this.i + 1} de ${this.questions.length}</span><span class="tag">${tag}</span></div>
       <div class="progress small"><div style="width:${(this.i / this.questions.length) * 100}%"></div></div>
       <h3 class="q">${esc(q.q)}</h3>`;
@@ -38,16 +38,16 @@ export class QuizRunner {
         let cls = ''; if (fb && !pre) cls = v === fb.correct ? 'right' : (v === fb.answer ? 'wrong' : ''); else if (fb && v === fb.answer) cls = 'chosen';
         return `<button class="opt ${cls}" data-v="${v}" ${fb ? 'disabled' : ''}>${v ? 'Verdadero' : 'Falso'}</button>`; }).join('')}</div>`;
     } else if (q.type === 'pick') {
-      if (!fb) html += `<p class="pick-hint">${this.pick ? `Seleccionaste: <b>${esc(this.partName(this.pick))}</b>` : '👆 Toca la parte en el modelo 3D (o usa los gestos)'}</p>
+      if (!fb) html += `<p class="pick-hint">${this.pick ? `Seleccionaste: <b>${esc(this.partName(this.pick))}</b>` : `${icon('mouse-pointer-2')} Toca la parte en el modelo 3D (o usa los gestos)`}</p>
         <button class="btn primary" id="qConfirm" ${this.pick ? '' : 'disabled'}>Confirmar</button>`;
     } else if (q.type === 'order') {
-      html += `<ol class="order">${q.view.map((it, i) => `<li><span>${esc(it)}</span>${fb ? '' : `<button data-up="${i}" ${i === 0 ? 'disabled' : ''}>▲</button><button data-down="${i}" ${i === q.view.length - 1 ? 'disabled' : ''}>▼</button>`}</li>`).join('')}</ol>`;
+      html += `<ol class="order">${q.view.map((it, i) => `<li><span>${esc(it)}</span>${fb ? '' : `<button data-up="${i}" title="Subir" ${i === 0 ? 'disabled' : ''}>${icon('chevron-up')}</button><button data-down="${i}" title="Bajar" ${i === q.view.length - 1 ? 'disabled' : ''}>${icon('chevron-down')}</button>`}</li>`).join('')}</ol>`;
       if (!fb) html += `<button class="btn primary" id="qConfirm">Confirmar orden</button>`;
       else if (!pre && !fb.ok) html += `<p class="muted small">Orden correcto: ${fb.correct.map(esc).join(' → ')}</p>`;
     }
     if (fb) {
       html += pre ? `<div class="feedback neutral">Respuesta registrada.</div>`
-        : `<div class="feedback ${fb.ok ? 'ok' : 'bad'}">${fb.ok ? '✔ ¡Correcto!' : '✖ Incorrecto'} — ${esc(fb.explain || '')}</div>`;
+        : `<div class="feedback ${fb.ok ? 'ok' : 'bad'}">${fb.ok ? icon('circle-check') + ' ¡Correcto!' : icon('circle-x') + ' Incorrecto'} — ${esc(fb.explain || '')}</div>`;
       html += `<button class="btn primary" id="qNext">${this.i + 1 < this.questions.length ? 'Siguiente →' : 'Ver resultados'}</button>`;
     }
     this.el.innerHTML = html;
@@ -79,7 +79,7 @@ export class QuizRunner {
     const byConcept = {};
     for (const a of res.answers) { const q = this.questions.find(x => x.id === a.qid); const k = q?.concept || 'General'; (byConcept[k] ||= [0, 0])[1]++; if (a.ok) byConcept[k][0]++; }
     const progress = await this.store.progress(), p = progress[this.moduleKey] || {};
-    const stars = res.score >= 90 ? '⭐⭐⭐' : res.score >= 60 ? '⭐⭐' : '⭐';
+    const nStars = res.score >= 90 ? 3 : res.score >= 60 ? 2 : 1, stars = [1, 2, 3].map(i => `<span class="star ${i <= nStars ? 'on' : ''}">${icon('star')}</span>`).join('');
     const gain = this.kind === 'post' && p.pre != null ? (p.pre >= 100 ? 0 : Math.round(((res.score - p.pre) / (100 - p.pre)) * 100) / 100) : null;
     this.el.innerHTML = `<div class="result"><div class="score">${res.score}%</div><div class="stars">${stars}</div>
         <p>${res.answers.filter(a => a.ok).length} de ${res.answers.length} correctas${this.kind === 'pre' ? ' en el pre-test' : ''}</p>

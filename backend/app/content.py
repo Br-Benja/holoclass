@@ -119,6 +119,7 @@ def create_model(db: Session, module: Module, key: str, data: dict, is_main: boo
 # ------------------------------------------------------------------ Siembra inicial
 def seed(db: Session, demo: bool = True):
     if db.scalar(select(Subject).limit(1)):
+        sync_subjects(db)
         return False
     c = load_content()
     subjects = {}
@@ -146,6 +147,15 @@ def seed(db: Session, demo: bool = True):
         seed_demo(db)
     db.commit()
     return True
+
+
+def sync_subjects(db: Session):
+    """Actualiza nombre, color e icono de las materias desde content.json (bases creadas con versiones anteriores)."""
+    for s in load_content()["subjects"]:
+        row = db.scalar(select(Subject).where(Subject.key == s["key"]))
+        if row:
+            row.name, row.color_hex, row.icon = s["name"], s["color"], s.get("icon")
+    db.commit()
 
 
 def reset_base_content(db: Session):

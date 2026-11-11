@@ -1,4 +1,6 @@
 // HoloClass · utilidades compartidas
+import { icon } from './icons.js';
+export { icon };
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -14,9 +16,10 @@ export function shuffle(arr) {
 export const fill = (text, vars = {}) => String(text ?? '').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 
 let toastTimer;
-export function toast(msg, ms = 2800) {
+/** Aviso flotante. `ic` es el nombre de un icono (opcional). */
+export function toast(msg, ms = 2800, ic = 'info') {
   const t = $('#toast'); if (!t) return;
-  t.textContent = msg; t.classList.add('show');
+  t.innerHTML = (ic ? icon(ic) : '') + `<span>${esc(msg)}</span>`; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms);
 }
 
