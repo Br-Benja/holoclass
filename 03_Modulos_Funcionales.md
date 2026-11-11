@@ -8,7 +8,7 @@ Leyenda: **[MVP]** se implementa y se demuestra · **[OPCIONAL]** solo si el MVP
 
 | # | Paso | Qué ocurre técnicamente | Qué ve el usuario |
 |---|------|-------------------------|-------------------|
-| 1 | Entra a la plataforma | SPA React; login → JWT con rol (estudiante/docente) | Pantalla de inicio de sesión |
+| 1 | Entra a la plataforma | SPA (módulos ES); login → JWT con rol (estudiante/docente), o modo local en el navegador | Pantalla de inicio de sesión |
 | 2 | Selecciona materia/módulo | `GET /api/subjects` y `GET /api/modules/{id}`; se precargan los GLB del módulo y se cachean | Tarjetas de materias → módulos con progreso |
 | 3 | Se activa la cámara | `getUserMedia`; se cargan parámetros de calibración (`camera.json`) | Video en vivo con marco guía "Muestra tu tarjeta aquí" |
 | 4 | Coloca la tarjeta | Se envían frames al Worker de HoloScan (~30 detecciones/s) | Indicador de búsqueda animado |
@@ -28,7 +28,7 @@ Leyenda: **[MVP]** se implementa y se demuestra · **[OPCIONAL]** solo si el MVP
 | Función | Estado | Implementación |
 |---------|--------|----------------|
 | Captura mediante webcam | [MVP] | `getUserMedia` 1280×720; selector de cámara si hay varias |
-| Reconocimiento de tarjetas | [MVP] | Cada tarjeta = ilustración + marcador ArUco `DICT_4X4_50` con ID único |
+| Reconocimiento de tarjetas | [MVP] | Cada tarjeta = ilustración + marcador ArUco `ARUCO_MIP_36h12` con ID único |
 | Detección de marcadores | [MVP] | js-aruco2 en Web Worker sobre frame reducido a 640×360 |
 | Seguimiento de posición y orientación | [MVP] | Pose 6DoF (POSIT) + filtro One-Euro |
 | Asociación marcador → modelo 3D | [MVP] | Tabla `marker` en BD; mapa cacheado en el cliente |

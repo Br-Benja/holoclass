@@ -6,7 +6,7 @@
 |---|-----|-------------------|
 | **I1** | Reconocimiento de marcadores y cámara | HoloScan (js-aruco2, Worker), pose, calibración con OpenCV, filtro One-Euro, pérdida de seguimiento, motor RA (cámara virtual sobre video), [OPC] HoloHands |
 | **I2** | Modelos 3D y Blender | Fuentes y licencias, segmentación, animaciones, optimización GLB, sistema solar y moléculas procedurales (con I1), etiquetas |
-| **I3** | Frontend y experiencia de usuario | Figma, React, todas las pantallas, interacción (raycasting, controles), panel de información, cuestionario, panel docente |
+| **I3** | Frontend y experiencia de usuario | Figma, interfaz web (módulos ES + Three.js), todas las pantallas, interacción (raycasting, controles), panel de información, cuestionario, panel docente |
 | **I4** | Backend y base de datos | Esquema PostgreSQL, FastAPI, auth y roles, contenidos, calificación, analítica, asistente de módulos |
 | **I5** | Integración, pruebas y contenido educativo | Textos por parte (revisados con un docente de ciencias), preguntas, narraciones, tarjetas impresas, pruebas técnicas, prueba piloto, guion de demo |
 
@@ -15,7 +15,7 @@
 | Semana | I1 · Marcadores/cámara | I2 · Modelos 3D | I3 · Frontend/UX | I4 · Backend/BD | I5 · Integración/contenido | **Entregable** |
 |--------|------------------------|-----------------|------------------|-----------------|----------------------------|----------------|
 | **1** Planeación y pruebas de concepto | Prueba: js-aruco2 detecta un marcador impreso y dibuja un cubo con Three.js | Buscar modelos, registrar licencias; exportar uno de prueba a GLB | Wireframes Figma de las 10 pantallas; guía de estilo | Modelo ER; FastAPI esqueleto; Postgres | Repo, kanban, plan de pruebas; selección de temas con un docente asesor | **Prueba de concepto RA (cubo sobre la tarjeta)**, ER, wireframes |
-| **2** Base técnica | Worker de detección; generar marcadores con OpenCV; calibrar cámara (ChArUco) | Corazón segmentado y nombrado (v1); texturas de planetas | Proyecto React + R3F; login, panel, materias | `schema.sql`, auth JWT/roles, endpoints de catálogo | Redactar contenidos del corazón; diseño de tarjetas v1 | Modelo del corazón en el visor; API de catálogo en Swagger |
+| **2** Base técnica | Worker de detección; generar marcadores con OpenCV; calibrar cámara (ChArUco) | Corazón segmentado y nombrado (v1); texturas de planetas | Interfaz base (módulos ES + Three.js); login, panel, materias | `schema.sql`, auth JWT/roles, endpoints de catálogo | Redactar contenidos del corazón; diseño de tarjetas v1 | Modelo del corazón en el visor; API de catálogo en Swagger |
 | **3** RA estable | Filtro One-Euro, máquina de estados de seguimiento, multi-marcador | Latido; sistema solar procedural con órbitas | Visor RA + selección de partes (raycasting) + panel de información | Contenidos por parte y sesiones/eventos | Imprimir tarjetas v1; pruebas de detección (distancia/ángulo/luz) | **Corazón en RA seleccionable con explicaciones** |
 | **4** Tres módulos | Modo Anclado; guía de calidad de imagen; comparación de 2 marcadores | Moléculas + Bohr (con I1); etiquetas (*Empties*) | Recorrido guiado, narración TTS, controles de interacción | Cuestionarios: preguntas, opciones, calificación en servidor | Contenidos de astronomía y química; banco de preguntas | **3 módulos navegables en RA** |
 | **5** Evaluación | Optimización de rendimiento (pixelRatio, calidad adaptativa) | Vista explosionada, corte, flujo sanguíneo | HoloQuiz completo (incl. selección espacial) + resultados | Pre/post-test, estadísticas, vistas | Narraciones MP3 del corazón; pruebas de integración | **Ciclo completo: explorar → cuestionario → resultados** |
@@ -45,7 +45,7 @@ gantt
     Explosión/corte/flujo       :b5, after b4, 7d
     section Frontend (I3)
     Figma                       :c1, 2026-01-05, 7d
-    Base React                  :c2, after c1, 7d
+    Base de la interfaz         :c2, after c1, 7d
     Visor + selección           :c3, after c2, 7d
     Aprendizaje + narración     :c4, after c3, 7d
     HoloQuiz                    :c5, after c4, 7d
@@ -86,7 +86,7 @@ flowchart LR
 
 ### 4.1 Software — $0
 
-Three.js, React, js-aruco2, OpenCV, MediaPipe, Blender, gltf-transform, FastAPI, PostgreSQL, Figma (educación), Canva (educación), GitHub Student Pack: **todos gratuitos**. Modelos y texturas: solo con licencia CC0/CC BY o dominio público → **$0**.
+Three.js, js-aruco2, OpenCV, MediaPipe, Blender, gltf-transform, FastAPI, PostgreSQL, Figma (educación), Canva (educación), GitHub Student Pack: **todos gratuitos**. Modelos y texturas: solo con licencia CC0/CC BY o dominio público → **$0**.
 
 ### 4.2 Hardware y materiales
 

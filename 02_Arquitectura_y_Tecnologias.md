@@ -37,11 +37,11 @@
 | Tecnología | ¿Se usa? | Dónde y para qué | Alternativa considerada |
 |------------|:---:|------------------|-------------------------|
 | **JavaScript (ES2022)** | ✅ | Lenguaje del frontend, RA e interacción | TypeScript [OPCIONAL] si el equipo lo domina |
-| **React 18 + Vite** | ✅ | SPA: pantallas, rutas, estado, panel docente | Vue (igual de válido; React tiene mejor ecosistema 3D) |
+| **JavaScript con módulos ES** (implementado) | ✅ | SPA: pantallas, rutas por hash, estado, panel docente — sin paso de compilación | React 18 + Vite (propuesta original; descartado para publicar directo en GitHub Pages) |
 | **Three.js (r16x)** | ✅ | Motor 3D: escena, cámara virtual, luces, carga GLB, animaciones, raycasting para seleccionar partes, planos de corte | Babylon.js (completo, pero más pesado y con menos ejemplos con React) |
-| **React Three Fiber + drei** | ✅ | Integrar Three.js en React de forma declarativa; componentes listos (`useGLTF`, `Html` para etiquetas, `OrbitControls`) | Three.js "puro" en un `useEffect` |
+| **Three.js addons** (OrbitControls, GLTFLoader, meshopt) | ✅ | Cámara orbital en modo fijado, carga de modelos GLB del docente; etiquetas como HTML proyectado | React Three Fiber + drei (solo tendría sentido con React) |
 | **WebGL 2** | ✅ (vía Three.js) | Aceleración gráfica con la GPU integrada | WebGPU [FUTURO] |
-| **ArUco** | ✅ | Marcadores fiduciales de las tarjetas (diccionario `DICT_4X4_50`) | AprilTag (similar), QR (no da pose estable) |
+| **ArUco** | ✅ | Marcadores fiduciales de las tarjetas (diccionario `ARUCO_MIP_36h12`, idéntico en js-aruco2 y OpenCV) | AprilTag (similar), QR (no da pose estable) |
 | **js-aruco2** | ✅ | Detección de marcadores y pose en el navegador | OpenCV.js |
 | **OpenCV (Python)** | ✅ | Generación de marcadores, calibración, pruebas de rendimiento | — |
 | **Python 3.11** | ✅ | Backend y scripts de herramientas | Node.js (posible, pero el equipo ya domina Python y se reutiliza con OpenCV) |
@@ -78,7 +78,7 @@ flowchart TB
         INT["Sistema de interacción<br/>ratón/táctil · raycasting · gestos · teclado"]
         LRN["HoloLearn<br/>explicaciones · narración TTS · exploración"]
         QZ["HoloQuiz (cliente)<br/>preguntas · selección espacial"]
-        UI["React UI<br/>estudiante · docente"]
+        UI["Interfaz web (módulos ES)<br/>estudiante · docente"]
         CACHE[("Caché del navegador<br/>modelos GLB · contenidos")]
     end
 
@@ -208,7 +208,7 @@ El modo **Anclado** es clave para la experiencia: el estudiante puede soltar la 
 ```mermaid
 sequenceDiagram
     actor E as Estudiante
-    participant UI as React UI
+    participant UI as Interfaz web
     participant W as Worker HoloScan
     participant M as Motor RA / HoloModel
     participant API as FastAPI
@@ -239,32 +239,27 @@ sequenceDiagram
 
 ---
 
-## 5. Estructura del repositorio
+## 5. Estructura del repositorio (implementada)
 
 ```
-holoclass/
-├── frontend/
-│   ├── public/
-│   │   ├── assets/models/          # heart.glb, solar/*.glb, textures
-│   │   └── camera.json             # parámetros de calibración
-│   └── src/
-│       ├── ar/                     # arucoWorker.js, tracker.js (One-Euro), ARScene.jsx
-│       ├── models/                 # HeartModel.jsx, SolarSystem.jsx, MoleculeBuilder.js
-│       ├── interaction/            # usePicking.js, useHands.js [OPC]
-│       ├── learn/                  # InfoPanel.jsx, Narrator.js, GuidedTour.jsx
-│       ├── quiz/                   # QuizRunner.jsx, SpatialQuestion.jsx
-│       ├── teacher/                # páginas del panel docente
-│       └── pages/
-├── backend/
-│   └── app/  (main.py, routers/, services/, models/, schemas/)
+02_HoloClass/
+├── app/                            # interfaz web (módulos ES, sin compilación)
+│   ├── index.html · styles.css · tarjetas.html · camera.json
+│   ├── data/content.json           # contenido educativo único (modo local y base de datos)
+│   └── js/
+│       ├── main.js                 # sesión, navegación, inicio
+│       ├── store.js                # LocalStore (navegador) / ApiStore (FastAPI)
+│       ├── ar.js · aruco-worker.js # HoloScan: Worker + POSIT + One-Euro + reacciones
+│       ├── models.js               # corazón, sistema solar, moléculas, Bohr, GLB
+│       ├── viewer.js · quiz.js     # HoloLearn + HoloQuiz
+│       ├── hands.js                # HoloHands (MediaPipe, beta)
+│       └── teacher.js              # HoloTeacher
+├── backend/                        # FastAPI + SQLAlchemy (+ tests/ con pytest)
 ├── tools/                          # Python + OpenCV
-│   ├── generate_markers.py         # genera PNG/PDF de tarjetas
-│   ├── calibrate_camera.py         # ChArUco → camera.json
+│   ├── generate_markers.py         # PNG/PDF de tarjetas
+│   ├── calibrate_camera.py         # ChArUco → app/camera.json
 │   └── benchmark_detection.py      # métricas de detección
-├── content/
-│   ├── blender/                    # .blend fuente
-│   ├── molecules/*.json            # coordenadas y enlaces
-│   └── LICENSES.md                 # fuente y licencia de cada recurso
-├── cards/                          # diseño de tarjetas (Figma/Canva → PDF)
-└── database/schema.sql
+└── database/schema.sql             # generado desde backend/app/models.py
 ```
+
+> **Nota de implementación:** el diseño original proponía React + Vite + React Three Fiber. Se implementó con **JavaScript en módulos ES y Three.js directo** para publicar sin compilación (GitHub Pages) y simplificar la depuración. El diccionario final es **ARUCO_MIP_36h12** (distancia de Hamming 12). Ver [10_Implementacion.md](10_Implementacion.md#4-decisiones-que-cambiaron-respecto-al-diseño-original).

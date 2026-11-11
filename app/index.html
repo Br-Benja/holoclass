@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HoloClass</title>
+  <meta name="description" content="Aula interactiva de aprendizaje con realidad aumentada y visión artificial">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔷</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- js-aruco2 (MIT): se usa en el hilo principal para generar marcadores y como respaldo de detección -->
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/cv.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/aruco.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/svd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/posit1.js"></script>
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="#/home"><span class="cube">◆</span> HoloClass</a>
+    <nav class="nav">
+      <a href="#/home" data-nav="home">Inicio</a>
+      <a href="tarjetas.html" target="_blank">🖨 Tarjetas</a>
+      <a href="#/teacher" data-nav="teacher" id="navTeacher" hidden>👩‍🏫 Panel docente</a>
+      <a href="#/about" data-nav="about">ⓘ Acerca</a>
+    </nav>
+    <div class="userbox">
+      <span id="modeBadge" class="pill"></span>
+      <span id="userChip" class="user-chip" hidden></span>
+      <button id="btnLogout" class="btn ghost small" hidden>Salir</button>
+    </div>
+  </header>
+
+  <div id="boot" class="boot"><div class="spinner"></div><p>Cargando HoloClass…</p></div>
+
+  <!-- ================= INICIO DE SESIÓN ================= -->
+  <main data-page="login" class="login" hidden>
+    <section class="login-hero">
+      <h1>Convierte una tarjeta de papel en una <span class="glow">lección 3D</span></h1>
+      <p>Muestra una tarjeta a la webcam: el modelo aparece sobre ella, lo exploras por partes con explicación en voz, y respondes preguntas <b>tocando el modelo</b>. Tu docente ve qué conceptos dominas.</p>
+      <ul class="feats"><li>🫀 Anatomía</li><li>🪐 Astronomía</li><li>⚛️ Química</li><li>✋ Gestos</li><li>📊 Panel docente</li></ul>
+    </section>
+    <section class="login-card">
+      <div class="tabs"><button class="tab active" data-ltab="in">Entrar</button><button class="tab" data-ltab="up">Crear cuenta</button></div>
+      <form id="formIn" class="lform">
+        <label class="field">Correo<input type="email" id="inEmail" autocomplete="username" required></label>
+        <label class="field">Contraseña<input type="password" id="inPass" autocomplete="current-password" required></label>
+        <button class="btn primary big" type="submit">Entrar</button>
+      </form>
+      <form id="formUp" class="lform" hidden>
+        <label class="field">Nombre completo<input id="upName" required maxlength="100"></label>
+        <label class="field">Correo<input type="email" id="upEmail" autocomplete="username" required></label>
+        <label class="field">Contraseña (mín. 6)<input type="password" id="upPass" autocomplete="new-password" minlength="6" required></label>
+        <label class="field">Soy<select id="upRole"><option value="estudiante">Estudiante</option><option value="docente">Docente</option></select></label>
+        <label class="field" id="upCodeWrap">Código de grupo (opcional)<input id="upCode" maxlength="6" placeholder="Ej. DEMO01" style="text-transform:uppercase"></label>
+        <button class="btn primary big" type="submit">Crear cuenta</button>
+      </form>
+      <p id="loginErr" class="err"></p>
+      <div class="demo-box"><p class="muted small">Para probar rápido:</p>
+        <div class="row"><button class="btn ghost" id="demoStudent">🎒 Estudiante demo</button><button class="btn ghost" id="demoTeacher">👩‍🏫 Docente demo</button><button class="btn ghost" id="guestBtn">Explorar sin cuenta</button></div>
+        <p class="muted small">Demo: <code>estudiante@demo.mx</code> / <code>docente@demo.mx</code> · contraseña <code>demo1234</code> · grupo <code>DEMO01</code></p></div>
+    </section>
+  </main>
+
+  <!-- ================= INICIO (ESTUDIANTE / DOCENTE) ================= -->
+  <main data-page="home" class="page" hidden>
+    <section class="hello">
+      <div><h1 id="hello"></h1><p id="helloSub" class="muted"></p></div>
+      <div id="joinBox" class="join-box">
+        <form id="formJoin" class="row"><input id="joinCode" maxlength="6" placeholder="Código de grupo" style="text-transform:uppercase"><button class="btn ghost">Unirme</button></form>
+        <p id="myGroups" class="muted small"></p>
+      </div>
+    </section>
+    <div id="guestNote" class="warnbox" hidden>Estás como <b>invitado</b>: tu progreso solo se guarda en este navegador y tu docente no lo verá. <a href="#/login">Crea una cuenta</a>.</div>
+    <div id="badges" class="badges"></div>
+    <h2>Módulos</h2>
+    <div id="modules" class="modules"></div>
+  </main>
+
+  <!-- ================= VISOR RA ================= -->
+  <main data-page="viewer" class="viewer" hidden>
+    <div class="viewer-head">
+      <a class="btn ghost small" href="#/home">← Módulos</a>
+      <h2 id="vTitle"></h2>
+      <span id="vStatus" class="pill search">—</span>
+    </div>
+    <div class="viewer-grid">
+      <div class="stage-col" id="stageCol">
+        <div id="stage" class="stage">
+          <video id="video" class="mirror" playsinline muted></video>
+          <canvas id="sim" class="mirror" hidden></canvas>
+          <div id="gl"></div>
+          <div id="labels"></div>
+          <div id="handCursor" class="hand-cursor" hidden></div>
+          <div id="hint" class="hint"></div>
+          <div id="fps" class="fps"></div>
+        </div>
+        <div class="toolbar">
+          <button id="tPin" class="tool">📌 Fijar en pantalla</button>
+          <button id="tAnim" class="tool">⏯ Animación</button>
+          <button id="tFlow" class="tool">🩸 Flujo</button>
+          <button id="tCut" class="tool">✂ Corte</button>
+          <span id="cutWrap" class="slider" hidden>Corte <input type="range" id="cutRange" min="0" max="1" step="0.01" value="0"></span>
+          <button id="tExplode" class="tool">💥 Explosionar</button>
+          <button id="tScale" class="tool">🔭 Escala real</button>
+          <button id="tLabels" class="tool">🏷 Etiquetas</button>
+          <button id="tHands" class="tool">✋ Gestos <small>beta</small></button>
+          <button id="tCam" class="tool">📷 Cámara</button>
+          <button id="tSim" class="tool">🧪 Simulación</button>
+          <button id="tFull" class="tool" title="Pantalla completa">⛶</button>
+          <button id="tSettings" class="tool" title="Ajustes">⚙</button>
+        </div>
+        <div id="simButtons" class="sim-buttons"></div>
+        <div id="settingsPop" class="settings" hidden>
+          <label>Cámara <select id="camSelect"><option value="">Predeterminada</option></select></label>
+          <label>Velocidad de animación <input type="range" id="speedRange" min="0.25" max="3" step="0.25" value="1"> <b id="speedVal">1.00×</b></label>
+          <label><input type="checkbox" id="autoSpeak"> 🔊 Narrar al tocar una parte</label>
+        </div>
+      </div>
+      <aside class="panel">
+        <div class="tabs">
+          <button class="tab active" data-vtab="info">Explorar</button>
+          <button class="tab" data-vtab="tour">Recorrido</button>
+          <button class="tab" data-vtab="eval">Evaluación</button>
+        </div>
+        <div id="pInfo" class="panel-body"></div>
+        <div id="pTour" class="panel-body" hidden></div>
+        <div id="pEval" class="panel-body" hidden></div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ================= PANEL DOCENTE ================= -->
+  <main data-page="teacher" class="page" hidden>
+    <h1>👩‍🏫 Panel docente</h1>
+    <div class="tabs ttabs">
+      <button class="tab active" data-ttab="summary">📊 Resumen</button>
+      <button class="tab" data-ttab="groups">👥 Grupos</button>
+      <button class="tab" data-ttab="content">✏️ Contenidos</button>
+      <button class="tab" data-ttab="quizzes">📝 Preguntas</button>
+      <button class="tab" data-ttab="newmodule">➕ Nuevo módulo</button>
+    </div>
+    <div id="teacherBody"></div>
+  </main>
+
+  <!-- ================= ACERCA / AJUSTES ================= -->
+  <main data-page="about" class="page" hidden>
+    <h1>ⓘ Acerca de HoloClass</h1>
+    <div id="aboutBody"></div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

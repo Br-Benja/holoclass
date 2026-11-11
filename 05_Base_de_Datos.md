@@ -1,6 +1,24 @@
 # 05 · Base de Datos — HoloClass
 
-Motor: **PostgreSQL 16+** · Script completo y probado: [`database/schema.sql`](database/schema.sql)
+Motor: **PostgreSQL 16+** (SQLite para pruebas) · Script completo y probado: [`database/schema.sql`](database/schema.sql)
+
+## 0. Cómo quedó en la implementación
+
+El esquema ahora se **genera desde los modelos del backend** (`backend/app/models.py`, SQLAlchemy 2) con `backend/scripts/export_schema.py`, y el servidor crea las tablas y siembra el contenido de `app/data/content.json` al arrancar. Se probó completo en PostgreSQL 18 (18 tablas + 3 vistas). Diferencias respecto al diseño inicial de esta sección:
+
+| Cambio | Motivo |
+|--------|--------|
+| Claves de texto `subject.key`, `module.key`, `model_3d.key`, `question.qkey` | Coinciden con `content.json` y con el frontend; la misma pregunta se identifica igual en el modo local y en el servidor |
+| `model_3d.is_main`, `intro`, `scale`, `tour` (JSON), `animations` (JSON); se quitan `procedural_key` y la tabla `model_animation` | El `key` ya identifica el modelo procedural; menos tablas para lo mismo |
+| `educational_content` por parte con `UNIQUE(part_id, kind)` y tipos `explicacion`, `dato_curioso`, `saber_mas` | Edición directa desde el panel docente |
+| `quiz.kind` (`pre` / `post`) en lugar de `is_pretest`; `question.qtype` (`mc`, `tf`, `pick`, `order`) | Cuatro tipos de pregunta, incluida la de ordenar |
+| `question.active` | Al editar un cuestionario, las preguntas retiradas se desactivan en vez de borrarse: el historial de respuestas se conserva |
+| `answer_option.position` | En preguntas de ordenar guarda la posición correcta |
+| `learning_session.user_id`; `interaction_event.model_key`, `part_key`, `marker_code`, `payload` (JSON); tipos extra `reaccion` y `gesto` | Registrar también reacciones químicas y gestos |
+| `attempt_answer.answer` (JSON) | Guarda cualquier tipo de respuesta (índice, verdadero/falso, parte, lista ordenada) |
+| `app_user.simulated` | Los datos simulados para demostrar el panel se identifican y se borran con un clic |
+
+Las secciones siguientes conservan el razonamiento del diseño; el detalle exacto de columnas está en `database/schema.sql`.
 
 ## 1. Decisiones de diseño
 

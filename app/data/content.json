@@ -1,0 +1,256 @@
+{
+  "version": 2,
+  "subjects": [
+    { "key": "anatomia", "name": "Anatomía", "color": "#EF4444", "icon": "🫀" },
+    { "key": "astronomia", "name": "Astronomía", "color": "#6366F1", "icon": "🪐" },
+    { "key": "quimica", "name": "Química", "color": "#10B981", "icon": "⚛️" }
+  ],
+  "modules": [
+    { "key": "corazon", "subject": "anatomia", "title": "El corazón humano", "level": "Secundaria",
+      "desc": "Cavidades, grandes vasos, válvulas, latido, flujo sanguíneo y corte interno.",
+      "main": "heart", "markers": [1], "min_explored_pct": 60 },
+    { "key": "sistema_solar", "subject": "astronomia", "title": "El sistema solar", "level": "Secundaria",
+      "desc": "Planetas, órbitas, comparación de tamaños a escala real.",
+      "main": "solar", "markers": [2, 3, 10, 4, 8], "min_explored_pct": 50 },
+    { "key": "moleculas", "subject": "quimica", "title": "Geometría molecular", "level": "Bachillerato",
+      "desc": "Siete moléculas en 3D y reacciones juntando tarjetas de átomos.",
+      "main": "h2o", "markers": [5, 6, 7, 11, 12, 13, 14, 20, 21, 22, 23], "min_explored_pct": 50 },
+    { "key": "atomo", "subject": "quimica", "title": "El átomo de Bohr", "level": "Secundaria",
+      "desc": "Núcleo, capas y electrones de los primeros 10 elementos.",
+      "main": "bohr", "markers": [15], "min_explored_pct": 50 }
+  ],
+  "markers": {
+    "1":  { "model": "heart",   "title": "Corazón humano" },
+    "2":  { "model": "solar",   "title": "Sistema solar" },
+    "3":  { "model": "earth",   "title": "La Tierra" },
+    "10": { "model": "mars",    "title": "Marte" },
+    "4":  { "model": "jupiter", "title": "Júpiter" },
+    "8":  { "model": "saturn",  "title": "Saturno" },
+    "5":  { "model": "h2o",     "title": "Agua · H₂O" },
+    "6":  { "model": "co2",     "title": "Dióxido de carbono · CO₂" },
+    "7":  { "model": "ch4",     "title": "Metano · CH₄" },
+    "11": { "model": "nh3",     "title": "Amoniaco · NH₃" },
+    "12": { "model": "o2",      "title": "Oxígeno · O₂" },
+    "13": { "model": "c2h4",    "title": "Etileno · C₂H₄" },
+    "14": { "model": "c6h6",    "title": "Benceno · C₆H₆" },
+    "15": { "model": "bohr",    "title": "Átomo de Bohr" },
+    "20": { "model": "atom_H",  "title": "Átomo de hidrógeno (H)" },
+    "21": { "model": "atom_O",  "title": "Átomo de oxígeno (O)" },
+    "22": { "model": "atom_C",  "title": "Átomo de carbono (C)" },
+    "23": { "model": "atom_N",  "title": "Átomo de nitrógeno (N)" }
+  },
+  "free_markers": [30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+  "reactions": [
+    { "a": "H", "b": "O", "result": "h2o", "equation": "2 H + O → H₂O", "text": "El oxígeno comparte un par de electrones con cada uno de dos hidrógenos: se forma una molécula de agua." },
+    { "a": "C", "b": "O", "result": "co2", "equation": "C + 2 O → CO₂", "text": "El carbono forma dos dobles enlaces, uno con cada oxígeno: dióxido de carbono." },
+    { "a": "C", "b": "H", "result": "ch4", "equation": "C + 4 H → CH₄", "text": "El carbono forma cuatro enlaces sencillos con cuatro hidrógenos: metano." },
+    { "a": "N", "b": "H", "result": "nh3", "equation": "N + 3 H → NH₃", "text": "El nitrógeno forma tres enlaces con tres hidrógenos y conserva un par libre: amoniaco." }
+  ],
+  "elements": [
+    { "sym": "H",  "name": "Hidrógeno", "Z": 1,  "N": 0 },
+    { "sym": "He", "name": "Helio",     "Z": 2,  "N": 2 },
+    { "sym": "Li", "name": "Litio",     "Z": 3,  "N": 4 },
+    { "sym": "Be", "name": "Berilio",   "Z": 4,  "N": 5 },
+    { "sym": "B",  "name": "Boro",      "Z": 5,  "N": 6 },
+    { "sym": "C",  "name": "Carbono",   "Z": 6,  "N": 6 },
+    { "sym": "N",  "name": "Nitrógeno", "Z": 7,  "N": 7 },
+    { "sym": "O",  "name": "Oxígeno",   "Z": 8,  "N": 8 },
+    { "sym": "F",  "name": "Flúor",     "Z": 9,  "N": 10 },
+    { "sym": "Ne", "name": "Neón",      "Z": 10, "N": 10 }
+  ],
+  "models": {
+    "heart": {
+      "name": "Corazón humano", "source": "procedural",
+      "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "El corazón es un músculo del tamaño aproximado de un puño que late unas 100,000 veces al día. En este modelo el lado derecho está en azul (sangre con poco oxígeno) y el izquierdo en rojo (sangre oxigenada). Recuerda: el lado izquierdo del corazón aparece a TU derecha cuando lo ves de frente.",
+      "animations": ["latido", "flujo", "corte"],
+      "tour": ["vena_cava", "auricula_der", "valvulas", "ventriculo_der", "arteria_pulm", "venas_pulm", "auricula_izq", "ventriculo_izq", "aorta", "coronarias"],
+      "parts": {
+        "auricula_der":   { "name": "Aurícula derecha", "text": "Recibe la sangre con poco oxígeno que regresa de todo el cuerpo por las venas cavas y la pasa al ventrículo derecho a través de la válvula tricúspide.", "fact": "Aquí está el nodo sinusal, el “marcapasos natural” que inicia cada latido.", "more": "Las aurículas son cámaras de recepción: sus paredes son delgadas porque solo empujan la sangre unos centímetros, hasta el ventrículo que está debajo." },
+        "ventriculo_der": { "name": "Ventrículo derecho", "text": "Bombea la sangre con poco oxígeno hacia los pulmones a través de la arteria pulmonar.", "fact": "Su pared es más delgada que la del izquierdo porque los pulmones están muy cerca.", "more": "La circulación que va del ventrículo derecho a los pulmones y regresa a la aurícula izquierda se llama circulación menor o pulmonar." },
+        "auricula_izq":   { "name": "Aurícula izquierda", "text": "Recibe la sangre oxigenada que llega de los pulmones por las venas pulmonares y la pasa al ventrículo izquierdo a través de la válvula mitral.", "fact": "Recibe sangre de cuatro venas pulmonares.", "more": "Entre la aurícula y el ventrículo izquierdos está la válvula mitral, llamada así por su parecido con una mitra (sombrero de obispo)." },
+        "ventriculo_izq": { "name": "Ventrículo izquierdo", "text": "Es la cavidad más musculosa. Bombea la sangre oxigenada hacia la aorta para distribuirla a todo el cuerpo.", "fact": "Su pared puede ser hasta tres veces más gruesa que la del ventrículo derecho.", "more": "El recorrido desde el ventrículo izquierdo por todo el cuerpo hasta regresar a la aurícula derecha se llama circulación mayor o sistémica." },
+        "aorta":          { "name": "Arteria aorta", "text": "Es la arteria más grande del cuerpo. Sale del ventrículo izquierdo, forma un arco y lleva sangre oxigenada a todos los órganos.", "fact": "En un adulto mide unos 2.5 cm de diámetro. De su arco salen las arterias que van a la cabeza y a los brazos.", "more": "Las ramas del arco aórtico son el tronco braquiocefálico, la carótida común izquierda y la subclavia izquierda." },
+        "arteria_pulm":   { "name": "Arteria pulmonar", "text": "Sale del ventrículo derecho y se divide en dos ramas que llevan la sangre con poco oxígeno a cada pulmón.", "fact": "Es la única arteria del adulto que transporta sangre con poco oxígeno.", "more": "Las arterias se definen por salir del corazón, no por el oxígeno que llevan: por eso la arteria pulmonar es arteria aunque lleve sangre desoxigenada." },
+        "vena_cava":      { "name": "Venas cavas", "text": "La vena cava superior y la inferior devuelven al corazón la sangre con poco oxígeno de todo el cuerpo y la vierten en la aurícula derecha.", "fact": "La vena cava inferior es la vena más grande del cuerpo.", "more": "La superior recoge la sangre de la cabeza, el cuello y los brazos; la inferior, la del abdomen y las piernas." },
+        "venas_pulm":     { "name": "Venas pulmonares", "text": "Traen la sangre recién oxigenada desde los pulmones hasta la aurícula izquierda.", "fact": "Son las únicas venas del adulto que llevan sangre rica en oxígeno.", "more": "Normalmente son cuatro: dos de cada pulmón." },
+        "valvulas":       { "name": "Válvulas cardiacas", "text": "Cuatro válvulas (tricúspide, pulmonar, mitral y aórtica) funcionan como compuertas que solo dejan pasar la sangre en un sentido.", "fact": "El sonido “lub-dub” del latido es el cierre de las válvulas.", "more": "Activa el corte transversal para ver las válvulas entre aurículas y ventrículos y a la salida de las grandes arterias." },
+        "coronarias":     { "name": "Arterias coronarias", "text": "Rodean el corazón como una corona y le llevan sangre oxigenada al propio músculo cardiaco.", "fact": "Si una coronaria se obstruye, una parte del músculo deja de recibir oxígeno: eso es un infarto.", "more": "Las principales son la coronaria derecha y la izquierda, que se divide en la descendente anterior y la circunfleja." }
+      }
+    },
+    "solar": {
+      "name": "Sistema solar", "source": "procedural",
+      "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "Ocho planetas giran alrededor del Sol. Aquí los tamaños y distancias NO están a escala: si lo estuvieran, los planetas serían puntos invisibles.",
+      "animations": ["orbitas"],
+      "tour": ["sol", "mercurio", "venus", "tierra", "marte", "jupiter", "saturno", "urano", "neptuno"],
+      "parts": {
+        "sol":      { "name": "Sol", "text": "Estrella en el centro del sistema solar. Concentra más del 99.8 % de toda su masa.", "fact": "Su luz tarda unos 8 minutos en llegar a la Tierra.", "more": "Es una esfera de hidrógeno y helio cuyo núcleo alcanza unos 15 millones de °C." },
+        "mercurio": { "name": "Mercurio", "text": "El planeta más cercano al Sol y el más pequeño.", "fact": "Un año en Mercurio dura solo 88 días terrestres.", "more": "Casi no tiene atmósfera: de día supera los 400 °C y de noche baja a −180 °C." },
+        "venus":    { "name": "Venus", "text": "Segundo planeta. Su densa atmósfera de CO₂ atrapa el calor y lo convierte en el planeta más caliente.", "fact": "Gira en sentido contrario a la mayoría de los planetas.", "more": "Su superficie ronda los 465 °C por un efecto invernadero extremo." },
+        "tierra":   { "name": "Tierra", "text": "Tercer planeta desde el Sol y el único con vida conocida.", "fact": "Alrededor del 71 % de su superficie está cubierta de agua.", "more": "Su distancia al Sol (unos 150 millones de km) se usa como unidad: la unidad astronómica (UA)." },
+        "marte":    { "name": "Marte", "text": "El “planeta rojo”, por el óxido de hierro de su superficie.", "fact": "Tiene el volcán más alto conocido: el Monte Olimpo, de unos 22 km.", "more": "Tiene dos lunas pequeñas, Fobos y Deimos." },
+        "jupiter":  { "name": "Júpiter", "text": "El planeta más grande: un gigante gaseoso.", "fact": "Su diámetro es unas 11 veces el de la Tierra.", "more": "La Gran Mancha Roja es una tormenta más grande que la Tierra que lleva siglos activa." },
+        "saturno":  { "name": "Saturno", "text": "Gigante gaseoso famoso por sus anillos de hielo y roca.", "fact": "Su densidad es menor que la del agua.", "more": "Júpiter, Urano y Neptuno también tienen anillos, pero mucho más tenues." },
+        "urano":    { "name": "Urano", "text": "Gigante de hielo que gira “acostado”, con su eje muy inclinado.", "fact": "Su eje está inclinado unos 98°.", "more": "Fue el primer planeta descubierto con telescopio (1781)." },
+        "neptuno":  { "name": "Neptuno", "text": "El planeta más lejano del Sol, con los vientos más rápidos del sistema solar.", "fact": "Sus vientos superan los 2,000 km/h.", "more": "Tarda unos 165 años en dar una vuelta al Sol." }
+      }
+    },
+    "earth": { "name": "La Tierra", "source": "procedural", "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "Nuestro planeta y su satélite natural. Muestra también la tarjeta de Júpiter y activa “Escala real” para compararlos.",
+      "parts": {
+        "tierra": { "name": "Tierra", "text": "Tercer planeta desde el Sol. Diámetro aproximado: 12,742 km.", "fact": "Activa “Escala real” y muestra la tarjeta de Júpiter para compararlos." },
+        "luna":   { "name": "Luna", "text": "Satélite natural de la Tierra. Su diámetro es aproximadamente la cuarta parte del terrestre.", "fact": "Siempre nos muestra la misma cara." } } },
+    "mars": { "name": "Marte", "source": "procedural", "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "El planeta rojo, mitad del tamaño de la Tierra.",
+      "parts": { "marte": { "name": "Marte", "text": "Diámetro aproximado: 6,779 km, poco más de la mitad del de la Tierra.", "fact": "Un día marciano dura 24 h 37 min." } } },
+    "jupiter": { "name": "Júpiter", "source": "procedural", "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "El gigante del sistema solar.",
+      "parts": { "jupiter": { "name": "Júpiter", "text": "Diámetro aproximado: 139,820 km, unas 11 veces el de la Tierra.", "fact": "La Gran Mancha Roja es una tormenta más grande que la Tierra." } } },
+    "saturn": { "name": "Saturno", "source": "procedural", "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "El planeta de los anillos.",
+      "parts": {
+        "saturno": { "name": "Saturno", "text": "Diámetro aproximado: 116,460 km, unas 9 veces el de la Tierra.", "fact": "Su densidad es menor que la del agua." },
+        "anillos": { "name": "Anillos", "text": "Formados por miles de millones de fragmentos de hielo y roca.", "fact": "Miden cientos de miles de km de ancho, pero en su mayoría menos de 1 km de grosor." } } },
+    "h2o": { "name": "Agua (H₂O)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Un átomo de oxígeno unido a dos de hidrógeno, con un ángulo de 104.5°.",
+      "parts": {
+        "O": { "name": "Oxígeno (O)", "text": "Átomo central. Tiene dos pares de electrones libres que “empujan” a los hidrógenos y doblan la molécula.", "fact": "Color CPK: rojo." },
+        "H": { "name": "Hidrógeno (H)", "text": "Cada hidrógeno comparte un par de electrones con el oxígeno (enlace covalente sencillo).", "fact": "Color CPK: blanco." },
+        "enlaces": { "name": "Enlaces O–H", "text": "Dos enlaces covalentes con un ángulo de 104.5°: por eso el agua es una molécula ANGULAR y polar.", "fact": "Longitud de enlace: 0.96 Å." } } },
+    "co2": { "name": "Dióxido de carbono (CO₂)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Un carbono unido a dos oxígenos con dobles enlaces.",
+      "parts": {
+        "C": { "name": "Carbono (C)", "text": "Átomo central sin pares libres, por lo que los oxígenos quedan alineados.", "fact": "Color CPK: gris oscuro." },
+        "O": { "name": "Oxígeno (O)", "text": "Cada oxígeno forma un doble enlace con el carbono.", "fact": "Color CPK: rojo." },
+        "enlaces": { "name": "Dobles enlaces C=O", "text": "Ángulo de 180°: el CO₂ es una molécula LINEAL y no polar.", "fact": "Longitud de enlace: 1.16 Å." } } },
+    "ch4": { "name": "Metano (CH₄)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Un carbono unido a cuatro hidrógenos en forma de tetraedro.",
+      "parts": {
+        "C": { "name": "Carbono (C)", "text": "Forma cuatro enlaces sencillos distribuidos lo más separados posible.", "fact": "Color CPK: gris oscuro." },
+        "H": { "name": "Hidrógeno (H)", "text": "Los cuatro hidrógenos apuntan a los vértices de un tetraedro.", "fact": "Color CPK: blanco." },
+        "enlaces": { "name": "Enlaces C–H", "text": "Ángulo de 109.5°: el metano tiene geometría TETRAÉDRICA.", "fact": "Es el principal componente del gas natural." } } },
+    "nh3": { "name": "Amoniaco (NH₃)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Un nitrógeno unido a tres hidrógenos, con un par de electrones libre arriba.",
+      "parts": {
+        "N": { "name": "Nitrógeno (N)", "text": "Átomo central con tres enlaces y un par de electrones libre que empuja a los hidrógenos hacia abajo.", "fact": "Color CPK: azul." },
+        "H": { "name": "Hidrógeno (H)", "text": "Tres hidrógenos forman la base de una pirámide.", "fact": "Color CPK: blanco." },
+        "enlaces": { "name": "Enlaces N–H", "text": "Ángulo de 107°: el amoniaco tiene geometría PIRAMIDAL TRIGONAL.", "fact": "Se usa para fabricar fertilizantes." } } },
+    "o2": { "name": "Oxígeno molecular (O₂)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Dos átomos de oxígeno unidos por un doble enlace: el oxígeno que respiramos.",
+      "parts": {
+        "O": { "name": "Oxígeno (O)", "text": "Cada oxígeno comparte dos pares de electrones con el otro.", "fact": "Forma el 21 % del aire." },
+        "enlaces": { "name": "Doble enlace O=O", "text": "Un doble enlace hace a la molécula LINEAL (dos átomos siempre están en línea).", "fact": "Longitud de enlace: 1.21 Å." } } },
+    "c2h4": { "name": "Etileno (C₂H₄)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Dos carbonos unidos por un doble enlace, cada uno con dos hidrógenos. Toda la molécula es plana.",
+      "parts": {
+        "C": { "name": "Carbonos (C)", "text": "Cada carbono forma un doble enlace con el otro y dos enlaces sencillos con hidrógenos.", "fact": "Geometría PLANA TRIGONAL alrededor de cada carbono (≈120°)." },
+        "H": { "name": "Hidrógenos (H)", "text": "Los cuatro hidrógenos quedan en el mismo plano que los carbonos.", "fact": "El doble enlace impide que la molécula gire." },
+        "enlaces": { "name": "Enlaces", "text": "Un doble enlace C=C y cuatro enlaces sencillos C–H.", "fact": "Las frutas liberan etileno al madurar." } } },
+    "c6h6": { "name": "Benceno (C₆H₆)", "source": "procedural", "license": "Geometría a partir de valores experimentales de enlace", "attribution": "Equipo HoloClass",
+      "intro": "Seis carbonos en un anillo hexagonal plano, cada uno con un hidrógeno.",
+      "parts": {
+        "C": { "name": "Carbonos (C)", "text": "Forman un hexágono regular con ángulos de 120°.", "fact": "Todos los enlaces C–C miden lo mismo: 1.39 Å." },
+        "H": { "name": "Hidrógenos (H)", "text": "Cada carbono tiene un hidrógeno que apunta hacia afuera del anillo.", "fact": "Toda la molécula es plana." },
+        "enlaces": { "name": "Anillo aromático", "text": "Los electrones de los dobles enlaces están repartidos (deslocalizados) por todo el anillo; por eso se dibuja un círculo dentro del hexágono.", "fact": "Kekulé propuso esta estructura en 1865." } } },
+    "atom_H": { "name": "Átomo de hidrógeno", "source": "procedural", "license": "Propio", "attribution": "Equipo HoloClass", "intro": "Junta esta tarjeta con la de otro átomo para formar una molécula.",
+      "parts": { "atomo": { "name": "Hidrógeno (H)", "text": "Tiene 1 electrón y forma 1 enlace.", "fact": "Acércala a la tarjeta de O, C o N." } } },
+    "atom_O": { "name": "Átomo de oxígeno", "source": "procedural", "license": "Propio", "attribution": "Equipo HoloClass", "intro": "Junta esta tarjeta con la de otro átomo para formar una molécula.",
+      "parts": { "atomo": { "name": "Oxígeno (O)", "text": "Tiene 6 electrones en su capa externa y forma 2 enlaces.", "fact": "Acércala a la tarjeta de H o de C." } } },
+    "atom_C": { "name": "Átomo de carbono", "source": "procedural", "license": "Propio", "attribution": "Equipo HoloClass", "intro": "Junta esta tarjeta con la de otro átomo para formar una molécula.",
+      "parts": { "atomo": { "name": "Carbono (C)", "text": "Tiene 4 electrones en su capa externa y forma 4 enlaces.", "fact": "Acércala a la tarjeta de H o de O." } } },
+    "atom_N": { "name": "Átomo de nitrógeno", "source": "procedural", "license": "Propio", "attribution": "Equipo HoloClass", "intro": "Junta esta tarjeta con la de otro átomo para formar una molécula.",
+      "parts": { "atomo": { "name": "Nitrógeno (N)", "text": "Tiene 5 electrones en su capa externa y forma 3 enlaces.", "fact": "Acércala a la tarjeta de H." } } },
+    "bohr": { "name": "Átomo de Bohr", "source": "procedural", "license": "Propio (generado por código)", "attribution": "Equipo HoloClass",
+      "intro": "En el modelo de Bohr (1913) los electrones giran en capas (niveles de energía) alrededor de un núcleo con protones y neutrones. Elige un elemento abajo.",
+      "animations": ["orbitas"],
+      "tour": ["nucleo", "capa_1", "capa_2", "electrones"],
+      "parts": {
+        "nucleo":     { "name": "Núcleo", "text": "El núcleo de {name} tiene {Z} protón(es) (rojos, carga +) y {N} neutrón(es) (grises, sin carga).", "fact": "El núcleo concentra casi toda la masa del átomo, pero es unas 100,000 veces más pequeño que el átomo." },
+        "capa_1":     { "name": "Primera capa (K)", "text": "La primera capa admite como máximo 2 electrones.", "fact": "Configuración de {name}: {config}." },
+        "capa_2":     { "name": "Segunda capa (L)", "text": "La segunda capa admite como máximo 8 electrones.", "fact": "Cuando la última capa está llena, el átomo es muy estable (como el neón)." },
+        "electrones": { "name": "Electrones", "text": "{name} neutro tiene {Z} electrón(es) (carga −), igual que sus protones.", "fact": "Los electrones de la capa externa (valencia) determinan cómo se enlaza el átomo." }
+      }
+    }
+  },
+  "quizzes": {
+    "corazon": {
+      "pre": [
+        { "id": "c_pre1", "type": "mc", "q": "¿Cuántas cavidades tiene el corazón humano?", "options": ["2", "3", "4", "6"], "answer": 2, "concept": "Estructura", "explain": "Dos aurículas y dos ventrículos." },
+        { "id": "c_pre2", "type": "mc", "q": "¿Qué cavidad bombea sangre oxigenada a todo el cuerpo?", "options": ["Aurícula derecha", "Ventrículo derecho", "Aurícula izquierda", "Ventrículo izquierdo"], "answer": 3, "concept": "Circulación mayor", "explain": "El ventrículo izquierdo impulsa la sangre hacia la aorta." },
+        { "id": "c_pre3", "type": "tf", "q": "La arteria pulmonar lleva sangre a los pulmones.", "answer": true, "concept": "Circulación menor", "explain": "Sale del ventrículo derecho hacia los pulmones." },
+        { "id": "c_pre4", "type": "mc", "q": "¿Qué vaso recibe la sangre del ventrículo izquierdo?", "options": ["Vena cava", "Arteria pulmonar", "Aorta", "Vena pulmonar"], "answer": 2, "concept": "Circulación mayor", "explain": "La aorta distribuye la sangre oxigenada." },
+        { "id": "c_pre5", "type": "mc", "q": "¿Qué estructuras evitan que la sangre se regrese?", "options": ["Las venas cavas", "Las válvulas", "Las coronarias", "Las aurículas"], "answer": 1, "concept": "Estructura", "explain": "Las válvulas solo dejan pasar la sangre en un sentido." }
+      ],
+      "post": [
+        { "id": "c1", "type": "pick", "q": "Toca en el modelo la cavidad que bombea sangre oxigenada a todo el cuerpo.", "answer": "ventriculo_izq", "concept": "Circulación mayor", "explain": "El ventrículo izquierdo impulsa la sangre oxigenada hacia la aorta." },
+        { "id": "c2", "type": "pick", "q": "Toca la arteria que lleva sangre a los pulmones.", "answer": "arteria_pulm", "concept": "Circulación menor", "explain": "La arteria pulmonar sale del ventrículo derecho hacia los pulmones." },
+        { "id": "c3", "type": "mc", "q": "¿Cuántas cavidades tiene el corazón humano?", "options": ["2", "3", "4", "6"], "answer": 2, "concept": "Estructura", "explain": "Dos aurículas y dos ventrículos." },
+        { "id": "c4", "type": "pick", "q": "Toca la cavidad que recibe la sangre que regresa de todo el cuerpo.", "answer": "auricula_der", "concept": "Circulación mayor", "explain": "Las venas cavas desembocan en la aurícula derecha." },
+        { "id": "c5", "type": "order", "q": "Ordena el recorrido de la sangre con poco oxígeno, del cuerpo a los pulmones:", "items": ["Venas cavas", "Aurícula derecha", "Ventrículo derecho", "Arteria pulmonar"], "concept": "Circulación menor", "explain": "Venas cavas → aurícula derecha → ventrículo derecho → arteria pulmonar → pulmones." },
+        { "id": "c6", "type": "tf", "q": "Las arterias coronarias llevan sangre al propio músculo del corazón.", "answer": true, "concept": "Estructura", "explain": "Rodean el corazón como una corona y lo alimentan." },
+        { "id": "c7", "type": "mc", "q": "¿Qué vaso recibe la sangre del ventrículo izquierdo?", "options": ["Vena cava", "Arteria pulmonar", "Aorta", "Vena pulmonar"], "answer": 2, "concept": "Circulación mayor", "explain": "La aorta distribuye la sangre oxigenada a todo el cuerpo." },
+        { "id": "c8", "type": "pick", "q": "Toca los vasos que traen sangre oxigenada desde los pulmones.", "answer": "venas_pulm", "concept": "Circulación menor", "explain": "Las venas pulmonares llegan a la aurícula izquierda." }
+      ]
+    },
+    "sistema_solar": {
+      "pre": [
+        { "id": "s_pre1", "type": "mc", "q": "¿Qué planeta está más cerca del Sol?", "options": ["Venus", "Mercurio", "Marte", "Tierra"], "answer": 1, "concept": "Orden", "explain": "Mercurio es el primer planeta." },
+        { "id": "s_pre2", "type": "mc", "q": "¿Cuál es el planeta más grande?", "options": ["Saturno", "Tierra", "Júpiter", "Neptuno"], "answer": 2, "concept": "Tamaños", "explain": "Júpiter es unas 11 veces más ancho que la Tierra." },
+        { "id": "s_pre3", "type": "tf", "q": "Saturno es el único planeta con anillos.", "answer": false, "concept": "Características", "explain": "Júpiter, Urano y Neptuno también tienen anillos, aunque muy tenues." },
+        { "id": "s_pre4", "type": "mc", "q": "¿Qué lugar ocupa la Tierra contando desde el Sol?", "options": ["Segundo", "Tercero", "Cuarto", "Quinto"], "answer": 1, "concept": "Orden", "explain": "Mercurio, Venus y luego la Tierra." }
+      ],
+      "post": [
+        { "id": "s1", "type": "pick", "q": "Toca el planeta más grande del sistema solar.", "answer": "jupiter", "concept": "Tamaños", "explain": "Júpiter es unas 11 veces más ancho que la Tierra." },
+        { "id": "s2", "type": "pick", "q": "Toca el tercer planeta desde el Sol.", "answer": "tierra", "concept": "Orden", "explain": "Mercurio, Venus y luego la Tierra." },
+        { "id": "s3", "type": "pick", "q": "Toca el “planeta rojo”.", "answer": "marte", "concept": "Características", "explain": "Marte es rojo por el óxido de hierro de su superficie." },
+        { "id": "s4", "type": "pick", "q": "Toca el planeta con los anillos más visibles.", "answer": "saturno", "concept": "Características", "explain": "Los anillos de Saturno son los más grandes y brillantes." },
+        { "id": "s5", "type": "order", "q": "Ordena estos planetas del más cercano al más lejano del Sol:", "items": ["Mercurio", "Tierra", "Júpiter", "Neptuno"], "concept": "Orden", "explain": "Mercurio (1.º), Tierra (3.º), Júpiter (5.º), Neptuno (8.º)." },
+        { "id": "s6", "type": "tf", "q": "Júpiter es unas 11 veces más ancho que la Tierra.", "answer": true, "concept": "Tamaños", "explain": "139,820 km contra 12,742 km." },
+        { "id": "s7", "type": "mc", "q": "¿Qué planeta tarda más en dar una vuelta al Sol?", "options": ["Mercurio", "Tierra", "Saturno", "Neptuno"], "answer": 3, "concept": "Órbitas", "explain": "Neptuno tarda unos 165 años; cuanto más lejos, más largo el año." }
+      ]
+    },
+    "moleculas": {
+      "pre": [
+        { "id": "m_pre1", "type": "mc", "q": "¿Qué geometría tiene la molécula de agua?", "options": ["Lineal", "Angular", "Tetraédrica", "Plana trigonal"], "answer": 1, "concept": "Geometría", "explain": "Los pares libres del oxígeno doblan la molécula." },
+        { "id": "m_pre2", "type": "mc", "q": "¿Cuántos enlaces forma el carbono en el metano?", "options": ["2", "3", "4", "6"], "answer": 2, "concept": "Enlaces", "explain": "Uno con cada uno de los cuatro hidrógenos." },
+        { "id": "m_pre3", "type": "tf", "q": "El CO₂ es una molécula lineal.", "answer": true, "concept": "Geometría", "explain": "Los oxígenos quedan a 180°." },
+        { "id": "m_pre4", "type": "mc", "q": "¿Qué ángulo aproximado hay entre los enlaces del metano?", "options": ["90°", "104.5°", "109.5°", "180°"], "answer": 2, "concept": "Geometría", "explain": "Es el ángulo tetraédrico." }
+      ],
+      "post": [
+        { "id": "m1", "type": "pick", "q": "Toca el átomo de oxígeno de la molécula de agua.", "answer": "O", "concept": "Átomos", "explain": "El oxígeno es el átomo central (rojo)." },
+        { "id": "m2", "type": "pick", "q": "Toca un átomo de hidrógeno.", "answer": "H", "concept": "Átomos", "explain": "Los hidrógenos son las esferas blancas." },
+        { "id": "m3", "type": "mc", "q": "¿Qué geometría tiene la molécula de agua?", "options": ["Lineal", "Angular", "Tetraédrica", "Plana trigonal"], "answer": 1, "concept": "Geometría", "explain": "Los pares libres del oxígeno doblan la molécula." },
+        { "id": "m4", "type": "mc", "q": "¿Cuál es el ángulo H–O–H aproximado?", "options": ["90°", "104.5°", "120°", "180°"], "answer": 1, "concept": "Geometría", "explain": "Es de 104.5°, menor que el tetraédrico (109.5°)." },
+        { "id": "m5", "type": "mc", "q": "La molécula de CO₂ es…", "options": ["Angular", "Lineal", "Tetraédrica", "Piramidal"], "answer": 1, "concept": "Geometría", "explain": "Los dos oxígenos quedan a 180°." },
+        { "id": "m6", "type": "mc", "q": "¿Qué geometría tiene el amoniaco (NH₃)?", "options": ["Plana", "Lineal", "Piramidal trigonal", "Tetraédrica"], "answer": 2, "concept": "Geometría", "explain": "El par libre del nitrógeno forma la punta de la pirámide." },
+        { "id": "m7", "type": "tf", "q": "En el benceno, los 6 carbonos forman un anillo plano.", "answer": true, "concept": "Estructura", "explain": "Es un hexágono regular plano." },
+        { "id": "m8", "type": "mc", "q": "¿Qué tipo de enlace une a los dos átomos del O₂?", "options": ["Sencillo", "Doble", "Triple", "Ninguno"], "answer": 1, "concept": "Enlaces", "explain": "O=O: comparten dos pares de electrones." }
+      ]
+    },
+    "atomo": {
+      "pre": [
+        { "id": "a_pre1", "type": "mc", "q": "¿Qué partícula tiene carga positiva?", "options": ["Electrón", "Neutrón", "Protón", "Fotón"], "answer": 2, "concept": "Partículas", "explain": "El protón (+); el electrón es (−) y el neutrón no tiene carga." },
+        { "id": "a_pre2", "type": "mc", "q": "¿Dónde están los electrones en el modelo de Bohr?", "options": ["En el núcleo", "En capas alrededor del núcleo", "Pegados a los protones", "Fuera del átomo"], "answer": 1, "concept": "Modelo", "explain": "Giran en capas o niveles de energía." },
+        { "id": "a_pre3", "type": "tf", "q": "El número atómico (Z) indica cuántos protones tiene el átomo.", "answer": true, "concept": "Partículas", "explain": "Z = número de protones." },
+        { "id": "a_pre4", "type": "mc", "q": "¿Cuántos electrones caben como máximo en la primera capa?", "options": ["1", "2", "8", "18"], "answer": 1, "concept": "Configuración", "explain": "La capa K admite 2 electrones." }
+      ],
+      "post": [
+        { "id": "a1", "type": "pick", "q": "Toca el núcleo del átomo.", "answer": "nucleo", "concept": "Modelo", "explain": "El núcleo está en el centro, con protones y neutrones." },
+        { "id": "a2", "type": "pick", "q": "Toca un electrón.", "answer": "electrones", "concept": "Partículas", "explain": "Los electrones (amarillos) giran en las capas." },
+        { "id": "a3", "type": "mc", "q": "¿Qué partícula tiene carga positiva?", "options": ["Electrón", "Neutrón", "Protón", "Fotón"], "answer": 2, "concept": "Partículas", "explain": "El protón tiene carga positiva." },
+        { "id": "a4", "type": "mc", "q": "¿Cuántos electrones caben como máximo en la segunda capa?", "options": ["2", "6", "8", "18"], "answer": 2, "concept": "Configuración", "explain": "La capa L admite 8 electrones." },
+        { "id": "a5", "type": "mc", "q": "¿Cómo se distribuyen los 6 electrones del carbono?", "options": ["6", "2, 4", "4, 2", "2, 2, 2"], "answer": 1, "concept": "Configuración", "explain": "2 en la primera capa y 4 en la segunda." },
+        { "id": "a6", "type": "tf", "q": "Un átomo neutro tiene el mismo número de protones que de electrones.", "answer": true, "concept": "Partículas", "explain": "Las cargas se equilibran." },
+        { "id": "a7", "type": "mc", "q": "¿Qué elemento tiene su segunda capa completa con 8 electrones?", "options": ["Carbono", "Oxígeno", "Neón", "Litio"], "answer": 2, "concept": "Configuración", "explain": "Neón: 2, 8. Por eso es un gas noble muy estable." }
+      ]
+    }
+  },
+  "credits": [
+    { "what": "Three.js r160 (motor 3D)", "license": "MIT", "url": "https://threejs.org" },
+    { "what": "js-aruco2 2.0.0 (detección ArUco y POSIT)", "license": "MIT", "url": "https://github.com/damianofalcioni/js-aruco2" },
+    { "what": "MediaPipe Tasks Vision 0.10.21 (HoloHands)", "license": "Apache 2.0", "url": "https://github.com/google-ai-edge/mediapipe" },
+    { "what": "Fuentes Inter y Space Grotesk", "license": "SIL Open Font License", "url": "https://fonts.google.com" },
+    { "what": "Modelos 3D (corazón, sistema solar, moléculas, átomo)", "license": "Propios, generados por código por el equipo", "url": "" }
+  ]
+}

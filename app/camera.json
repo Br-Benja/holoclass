@@ -1,0 +1,1 @@
+{ "calibrated": false, "note": "Ejecuta tools/calibrate_camera.py para calibrar tu webcam y mejorar la precisión de la pose." }

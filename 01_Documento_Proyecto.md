@@ -99,7 +99,7 @@ Criterios (1 = bajo, 5 = alto). Para "esfuerzo" un 5 significa **poco esfuerzo**
 
 | Área | Incluido |
 |------|----------|
-| Plataforma | Aplicación web (React) ejecutada en Chrome/Edge en laptop con webcam; funciona en `localhost` y puede desplegarse en un servidor gratuito |
+| Plataforma | Aplicación web (JavaScript, módulos ES) ejecutada en Chrome/Edge en laptop con webcam; funciona en `localhost` y puede desplegarse en un servidor gratuito |
 | Marcadores | Tarjetas impresas con marcador ArUco (diccionario 4×4) + ilustración; 12–20 tarjetas |
 | RA | Detección, pose 3D y superposición del modelo sobre la tarjeta; suavizado y manejo de pérdida de seguimiento |
 | Modo escritorio | Sin cámara o al perder la tarjeta, el modelo puede "anclarse" a la pantalla para seguir explorándolo con el ratón |

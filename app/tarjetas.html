@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HoloClass · Tarjetas</title>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/cv.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/aruco.js"></script>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; margin: 0; padding: 16px; background: #eef1f8; color: #111; }
+    header { max-width: 980px; margin: 0 auto 16px; }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+    .filters a { padding: 6px 12px; border-radius: 99px; background: #fff; border: 1px solid #ccd; color: #333; text-decoration: none; font-weight: 600; font-size: .9rem; }
+    .filters a.on { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5cm, 1fr)); gap: 14px; max-width: 980px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 12px; border-top: 8px solid var(--c); padding: 12px 14px; display: grid; grid-template-columns: 1fr 5cm; gap: 10px; align-items: center; break-inside: avoid; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .card .marker { width: 5cm; height: 5cm; } .card .marker svg { width: 100%; height: 100%; display: block; shape-rendering: crispEdges; }
+    .card h3 { margin: 4px 0; font-size: 1.05rem; } .card small { color: #555; } .card .ico { font-size: 2.4rem; }
+    .card p { font-size: .8rem; color: #444; margin: 4px 0 0; }
+    button { padding: 8px 14px; border-radius: 8px; border: 0; background: #4f46e5; color: #fff; font-weight: 600; cursor: pointer; }
+    @media print { header { display: none; } body { background: #fff; padding: 0; } .grid { gap: 6mm; } .card { box-shadow: none; border: 1px solid #bbb; border-top: 8px solid var(--c); } }
+    @media (max-width: 520px) { .card { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tarjetas HoloClass</h1>
+    <p>Imprime en papel <b>mate</b> al <b>100 %</b> (sin “ajustar a la página”) para que cada marcador mida 5 cm. También puedes abrir esta página en un celular con el brillo al máximo y mostrarla a la cámara.</p>
+    <div class="filters" id="filters"></div>
+    <button onclick="print()">🖨 Imprimir</button>
+  </header>
+  <div class="grid" id="grid"><p>Cargando…</p></div>
+  <script>
+    (async () => {
+      const c = await (await fetch('./data/content.json')).json();
+      const qs = new URLSearchParams(location.search), mod = qs.get('module'), ids = qs.get('ids');
+      const subj = Object.fromEntries(c.subjects.map(s => [s.key, s]));
+      const markerModule = {}; c.modules.forEach(m => m.markers.forEach(id => markerModule[id] = m));
+      document.getElementById('filters').innerHTML = `<a href="?" class="${!mod && !ids ? 'on' : ''}">Todas</a>` +
+        c.modules.map(m => `<a href="?module=${m.key}" class="${mod === m.key ? 'on' : ''}">${subj[m.subject].icon} ${m.title}</a>`).join('');
+      let list = Object.entries(c.markers).map(([id, mk]) => ({ id: +id, ...mk }));
+      if (mod) list = list.filter(x => markerModule[x.id]?.key === mod);
+      if (ids) list = ids.split(',').map(Number).map(id => list.find(x => x.id === id) || { id, title: `Módulo propio`, model: null });
+      const dic = new AR.Dictionary('ARUCO_MIP_36h12');
+      document.getElementById('grid').innerHTML = list.map(x => {
+        const m = markerModule[x.id], s = m ? subj[m.subject] : { icon: '📦', name: 'Módulo propio', color: '#64748b' };
+        const intro = x.model && c.models[x.model] ? c.models[x.model].intro : 'Muestra esta tarjeta a la cámara en HoloClass.';
+        return `<div class="card" style="--c:${s.color}"><div><div class="ico">${s.icon}</div><small>${s.name}</small><h3>${x.title}</h3>
+          <p>${intro.length > 120 ? intro.slice(0, 117) + '…' : intro}</p><small>Marcador #${x.id}</small></div>
+          <div class="marker">${dic.generateSVG(x.id)}</div></div>`;
+      }).join('');
+    })();
+  </script>
+</body>
+</html>
